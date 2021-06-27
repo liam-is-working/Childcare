@@ -20,6 +20,7 @@ namespace Childcare.Areas.Identity
                         context.Configuration.GetConnectionString("ChildCareContextConnection")));
 
                 services.AddDefaultIdentity<ChildCareUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                    .AddRoles<IdentityRole>()
                     .AddEntityFrameworkStores<ChildCareContext>();
             });
         }
