@@ -61,6 +61,26 @@ namespace Childcare.Areas.Identity.Pages.Account
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
+
+            [Required]
+            [DataType(DataType.Text)]
+            [Display(Name ="Full name")]
+            public string FullName {get;set;}
+
+            [Required]
+            [DataType(DataType.Date)]
+            [Display(Name ="DOB")]
+            public DateTime DOB {get;set;}
+
+            [Required]
+            [DataType(DataType.Text)]
+            [Display(Name ="Address")]
+            public string Address{get;set;}
+
+            [Required]
+            [DataType(DataType.Text)]
+            [Display(Name ="Citizen ID")]
+            public string CitizenID{get;set;}
         }
 
         public async Task OnGetAsync(string returnUrl = null)
@@ -75,7 +95,8 @@ namespace Childcare.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
-                var user = new ChildCareUser { UserName = Input.Email, Email = Input.Email };
+                var user = new ChildCareUser { UserName = Input.Email, Email = Input.Email, DOB = Input.DOB,
+                                            CitizenID = Input.CitizenID, Address = Input.Address, FullName = Input.FullName };
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {

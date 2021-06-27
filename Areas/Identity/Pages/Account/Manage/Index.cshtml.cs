@@ -36,6 +36,26 @@ namespace Childcare.Areas.Identity.Pages.Account.Manage
             [Phone]
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
+
+            [Required]
+            [DataType(DataType.Text)]
+            [Display(Name ="Full name")]
+            public string FullName {get;set;}
+
+            [Required]
+            [DataType(DataType.Date)]
+            [Display(Name ="DOB")]
+            public DateTime DOB {get;set;}
+
+            [Required]
+            [DataType(DataType.Text)]
+            [Display(Name ="Address")]
+            public string Address{get;set;}
+
+            [Required]
+            [DataType(DataType.Text)]
+            [Display(Name ="Citizen ID")]
+            public string CitizenID{get;set;}
         }
 
         private async Task LoadAsync(ChildCareUser user)
@@ -47,7 +67,12 @@ namespace Childcare.Areas.Identity.Pages.Account.Manage
 
             Input = new InputModel
             {
-                PhoneNumber = phoneNumber
+                PhoneNumber = phoneNumber,
+                DOB = user.DOB,
+                FullName = user.FullName,
+                CitizenID = user.CitizenID,
+                Address = user.Address
+                
             };
         }
 
@@ -81,6 +106,7 @@ namespace Childcare.Areas.Identity.Pages.Account.Manage
             if (Input.PhoneNumber != phoneNumber)
             {
                 var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
+                
                 if (!setPhoneResult.Succeeded)
                 {
                     var userId = await _userManager.GetUserIdAsync(user);
@@ -88,6 +114,19 @@ namespace Childcare.Areas.Identity.Pages.Account.Manage
                 }
             }
 
+            if(!user.FullName.Equals(Input.FullName))
+                user.FullName = Input.FullName;
+            
+            if(!user.DOB.Equals(Input.DOB))
+                user.DOB = Input.DOB;
+
+            if(!user.CitizenID.Equals(Input.CitizenID))
+                user.CitizenID = Input.CitizenID;
+
+            if(!user.Address.Equals(Input.Address))
+                user.Address = Input.Address;
+
+            await _userManager.UpdateAsync(user);
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your profile has been updated";
             return RedirectToPage();
