@@ -15,6 +15,19 @@ namespace Childcare.Areas.Identity.Data
             : base(options)
         {
         }
+        public DbSet<Administrator> Administrators { get; set; }
+        public DbSet<BlogCategory> BlogCategories { get; set; }
+        public DbSet<Blog> Blogs { get; set; }
+        public DbSet<Customer> Customers { get; set; }
+        public DbSet<Feedback> Feedbacks { get; set; }
+        public DbSet<Manager> Managers { get; set; }
+        public DbSet<MedicalExamination> MedicalExaminations { get; set; }
+        public DbSet<Patient> Patients { get; set; }
+        public DbSet<Reservation> Reservations { get; set; }
+        public DbSet<Service> Services { get; set; }
+        public DbSet<Specialty> Specialties { get; set; }
+        public DbSet<Staff> Staffs { get; set; }
+        public DbSet<Status> Statuses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -22,6 +35,16 @@ namespace Childcare.Areas.Identity.Data
             // Customize the ASP.NET Identity model and override the defaults if needed.
             // For example, you can rename the ASP.NET Identity table names and more.
             // Add your customizations after calling base.OnModelCreating(builder);
+            builder.Entity<ChildCareUser>().Property(c => c.Id).HasColumnName("ChildCareUserId");
+
+            // builder.Entity<Administrator>()
+            //    .HasOne(t => t.ChildcareUserId);
+            // builder.Entity<Manager>()
+            //     .HasOne(t => t.ChildcareUserId);
+            // builder.Entity<Customer>()
+            //     .HasOne(t => t.ChildcareUserId);
+            // builder.Entity<Staff>()
+            //     .HasOne(t => t.ChildcareUserId);
         }
     }
 }

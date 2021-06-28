@@ -19,9 +19,84 @@ namespace Childcare.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+            modelBuilder.Entity("Childcare.Areas.Identity.Data.Administrator", b =>
+                {
+                    b.Property<int>("AdminID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("ChildcareUserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("AdminID");
+
+                    b.HasIndex("ChildcareUserId");
+
+                    b.ToTable("Administrators");
+                });
+
+            modelBuilder.Entity("Childcare.Areas.Identity.Data.Blog", b =>
+                {
+                    b.Property<int>("BlogID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("CategoryID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreadtedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("StaffID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StatusID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Thumbnail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Tile")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("BlogID");
+
+                    b.HasIndex("CategoryID");
+
+                    b.HasIndex("StaffID");
+
+                    b.HasIndex("StatusID");
+
+                    b.ToTable("Blogs");
+                });
+
+            modelBuilder.Entity("Childcare.Areas.Identity.Data.BlogCategory", b =>
+                {
+                    b.Property<int>("CategoryID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("CategoryName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("CategoryID");
+
+                    b.ToTable("BlogCategories");
+                });
+
             modelBuilder.Entity("Childcare.Areas.Identity.Data.ChildCareUser", b =>
                 {
                     b.Property<string>("Id")
+                        .HasColumnName("ChildCareUserId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("AccessFailedCount")
@@ -94,6 +169,277 @@ namespace Childcare.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers");
+                });
+
+            modelBuilder.Entity("Childcare.Areas.Identity.Data.Customer", b =>
+                {
+                    b.Property<int>("CustomerID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("ChildcareUserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("CustomerID");
+
+                    b.HasIndex("ChildcareUserId");
+
+                    b.ToTable("Customers");
+                });
+
+            modelBuilder.Entity("Childcare.Areas.Identity.Data.Feedback", b =>
+                {
+                    b.Property<int>("FeedbackID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("CustomerID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rate")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ReservationID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ServiceID")
+                        .HasColumnType("int");
+
+                    b.HasKey("FeedbackID");
+
+                    b.HasIndex("CustomerID");
+
+                    b.HasIndex("ReservationID");
+
+                    b.HasIndex("ServiceID");
+
+                    b.ToTable("Feedbacks");
+                });
+
+            modelBuilder.Entity("Childcare.Areas.Identity.Data.Manager", b =>
+                {
+                    b.Property<int>("ManagerID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("ChildcareUserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("ManagerID");
+
+                    b.HasIndex("ChildcareUserId");
+
+                    b.ToTable("Managers");
+                });
+
+            modelBuilder.Entity("Childcare.Areas.Identity.Data.MedicalExamination", b =>
+                {
+                    b.Property<int>("ExaminationID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Prescription")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ReservationID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ServiceID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("ExaminationID");
+
+                    b.HasIndex("ReservationID");
+
+                    b.HasIndex("ServiceID");
+
+                    b.ToTable("MedicalExaminations");
+                });
+
+            modelBuilder.Entity("Childcare.Areas.Identity.Data.Patient", b =>
+                {
+                    b.Property<int>("PatientID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("Birthday")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CustomerID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Gender")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PatientName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("PatientID");
+
+                    b.HasIndex("CustomerID");
+
+                    b.ToTable("Patients");
+                });
+
+            modelBuilder.Entity("Childcare.Areas.Identity.Data.Reservation", b =>
+                {
+                    b.Property<int>("ReservationID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("CheckInTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CustomerID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("OpenTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("PatientID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ServiceID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StaffAssignedID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("ReservationID");
+
+                    b.HasIndex("CustomerID");
+
+                    b.HasIndex("PatientID");
+
+                    b.HasIndex("ServiceID");
+
+                    b.HasIndex("StaffAssignedID");
+
+                    b.ToTable("Reservations");
+                });
+
+            modelBuilder.Entity("Childcare.Areas.Identity.Data.Service", b =>
+                {
+                    b.Property<int>("ServiceID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<float>("Price")
+                        .HasColumnType("real");
+
+                    b.Property<string>("ServiceName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("SpecialtyID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StaffID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StatusID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Thumbnail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("ServiceID");
+
+                    b.HasIndex("SpecialtyID");
+
+                    b.HasIndex("StaffID");
+
+                    b.HasIndex("StatusID");
+
+                    b.ToTable("Services");
+                });
+
+            modelBuilder.Entity("Childcare.Areas.Identity.Data.Specialty", b =>
+                {
+                    b.Property<int>("SpecialtyID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("SpecialtyName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("SpecialtyID");
+
+                    b.ToTable("Specialties");
+                });
+
+            modelBuilder.Entity("Childcare.Areas.Identity.Data.Staff", b =>
+                {
+                    b.Property<int>("StaffID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("ChildcareUserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int?>("SpecialtyID")
+                        .HasColumnType("int");
+
+                    b.HasKey("StaffID");
+
+                    b.HasIndex("ChildcareUserId");
+
+                    b.HasIndex("SpecialtyID");
+
+                    b.ToTable("Staffs");
+                });
+
+            modelBuilder.Entity("Childcare.Areas.Identity.Data.Status", b =>
+                {
+                    b.Property<int>("StatusID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("StatusName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("StatusID");
+
+                    b.ToTable("Statuses");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -229,6 +575,132 @@ namespace Childcare.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens");
+                });
+
+            modelBuilder.Entity("Childcare.Areas.Identity.Data.Administrator", b =>
+                {
+                    b.HasOne("Childcare.Areas.Identity.Data.ChildCareUser", "ChildCareUser")
+                        .WithMany()
+                        .HasForeignKey("ChildcareUserId");
+                });
+
+            modelBuilder.Entity("Childcare.Areas.Identity.Data.Blog", b =>
+                {
+                    b.HasOne("Childcare.Areas.Identity.Data.BlogCategory", "BlogCategory")
+                        .WithMany("Blogs")
+                        .HasForeignKey("CategoryID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Childcare.Areas.Identity.Data.Staff", "Staff")
+                        .WithMany("Blogs")
+                        .HasForeignKey("StaffID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Childcare.Areas.Identity.Data.Status", "Status")
+                        .WithMany("Blogs")
+                        .HasForeignKey("StatusID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Childcare.Areas.Identity.Data.Customer", b =>
+                {
+                    b.HasOne("Childcare.Areas.Identity.Data.ChildCareUser", "ChildCareUser")
+                        .WithMany()
+                        .HasForeignKey("ChildcareUserId");
+                });
+
+            modelBuilder.Entity("Childcare.Areas.Identity.Data.Feedback", b =>
+                {
+                    b.HasOne("Childcare.Areas.Identity.Data.Customer", "Customer")
+                        .WithMany("Feedbacks")
+                        .HasForeignKey("CustomerID");
+
+                    b.HasOne("Childcare.Areas.Identity.Data.Reservation", "Reservation")
+                        .WithMany("Feedbacks")
+                        .HasForeignKey("ReservationID");
+
+                    b.HasOne("Childcare.Areas.Identity.Data.Service", "Service")
+                        .WithMany("Feedbacks")
+                        .HasForeignKey("ServiceID");
+                });
+
+            modelBuilder.Entity("Childcare.Areas.Identity.Data.Manager", b =>
+                {
+                    b.HasOne("Childcare.Areas.Identity.Data.ChildCareUser", "ChildCareUser")
+                        .WithMany()
+                        .HasForeignKey("ChildcareUserId");
+                });
+
+            modelBuilder.Entity("Childcare.Areas.Identity.Data.MedicalExamination", b =>
+                {
+                    b.HasOne("Childcare.Areas.Identity.Data.Reservation", "Reservation")
+                        .WithMany("MedicalExaminations")
+                        .HasForeignKey("ReservationID");
+
+                    b.HasOne("Childcare.Areas.Identity.Data.Service", "Service")
+                        .WithMany("MedicalExaminations")
+                        .HasForeignKey("ServiceID");
+                });
+
+            modelBuilder.Entity("Childcare.Areas.Identity.Data.Patient", b =>
+                {
+                    b.HasOne("Childcare.Areas.Identity.Data.Customer", "Customer")
+                        .WithMany("Patients")
+                        .HasForeignKey("CustomerID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Childcare.Areas.Identity.Data.Reservation", b =>
+                {
+                    b.HasOne("Childcare.Areas.Identity.Data.Customer", "Customer")
+                        .WithMany("Reservations")
+                        .HasForeignKey("CustomerID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Childcare.Areas.Identity.Data.Patient", "Patient")
+                        .WithMany("Reservations")
+                        .HasForeignKey("PatientID");
+
+                    b.HasOne("Childcare.Areas.Identity.Data.Service", "Service")
+                        .WithMany("Reservations")
+                        .HasForeignKey("ServiceID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Childcare.Areas.Identity.Data.Staff", "Staff")
+                        .WithMany("Reservations")
+                        .HasForeignKey("StaffAssignedID");
+                });
+
+            modelBuilder.Entity("Childcare.Areas.Identity.Data.Service", b =>
+                {
+                    b.HasOne("Childcare.Areas.Identity.Data.Specialty", "Specialty")
+                        .WithMany("Services")
+                        .HasForeignKey("SpecialtyID");
+
+                    b.HasOne("Childcare.Areas.Identity.Data.Staff", "Staff")
+                        .WithMany("Services")
+                        .HasForeignKey("StaffID");
+
+                    b.HasOne("Childcare.Areas.Identity.Data.Status", "Status")
+                        .WithMany("Services")
+                        .HasForeignKey("StatusID");
+                });
+
+            modelBuilder.Entity("Childcare.Areas.Identity.Data.Staff", b =>
+                {
+                    b.HasOne("Childcare.Areas.Identity.Data.ChildCareUser", "ChildCareUser")
+                        .WithMany()
+                        .HasForeignKey("ChildcareUserId");
+
+                    b.HasOne("Childcare.Areas.Identity.Data.Specialty", "Specialty")
+                        .WithMany("Staffs")
+                        .HasForeignKey("SpecialtyID");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

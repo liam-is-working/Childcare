@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Study_material\\C#\\Childcare\\Childcare.csproj": {}
+    "D:\\Study_material\\C#\\ChildCareProject\\Childcare\\Childcare.csproj": {}
   },
   "projects": {
-    "D:\\Study_material\\C#\\Childcare\\Childcare.csproj": {
+    "D:\\Study_material\\C#\\ChildCareProject\\Childcare\\Childcare.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Study_material\\C#\\Childcare\\Childcare.csproj",
+        "projectUniqueName": "D:\\Study_material\\C#\\ChildCareProject\\Childcare\\Childcare.csproj",
         "projectName": "Childcare",
-        "projectPath": "D:\\Study_material\\C#\\Childcare\\Childcare.csproj",
+        "projectPath": "D:\\Study_material\\C#\\ChildCareProject\\Childcare\\Childcare.csproj",
         "packagesPath": "C:\\Users\\ACER\\.nuget\\packages\\",
-        "outputPath": "D:\\Study_material\\C#\\Childcare\\obj\\",
+        "outputPath": "D:\\Study_material\\C#\\ChildCareProject\\Childcare\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\ACER\\AppData\\Roaming\\NuGet\\NuGet.Config",
