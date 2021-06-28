@@ -13,7 +13,7 @@ namespace Childcare
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var host = CreateHostBuilder(args).Build();
 
@@ -33,7 +33,7 @@ namespace Childcare
                     //var testUserPw = config["SeedUserPW"];
 
                     //Populate Roles
-                    //await PopulateIdentityData.PopulateRolesAsync(services,new string[] {"Manager", "Staff", "Admin"});
+                    await PopulateIdentityData.PopulateRolesAsync(services,new string[] {"Manager", "Staff", "Admin"});
 
                     //Seed data
                     //SeedData.Initialize(services, "Passw0rd!").Wait();
