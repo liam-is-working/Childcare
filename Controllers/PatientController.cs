@@ -27,38 +27,63 @@ namespace Childcare.Controllers
 
         [HttpGet]
         public IActionResult PatientCreate(){
+            //return form to create new patient
             return View();
         }
 
         [HttpPost]
         //(not implemented) create model pls
-        public async Task<IActionResult> PatientCreateAsync(Patient model){          
+        public async Task<IActionResult> PatientCreateAsync(PatientCreateViewModel model){          
             if(!ModelState.IsValid){
                 //Serverside validation
                 return View(model);
             }
+
             var currentUserId = _um.GetUserId(User);
             if(currentUserId == null){
                 return NotFound("Current user is not valid");
             }
 
+            Patient newPatient = new Patient();
+
+            int currentCustomerId;
             try{
-                model.CustomerID = _db.Customers
+                currentCustomerId = _db.Customers
                 .First(c => c.ChildcareUserId == currentUserId).CustomerID;
+                newPatient.CustomerID = currentCustomerId;
             }
             catch (InvalidOperationException){
                 return NotFound("Current user is not valid");
             }
+
+            newPatient.Gender = model.Gender;
+            newPatient.PatientName = model.PatientName;
+            newPatient.Birthday = model.Birthday;
+            newPatient.CreatedDate = DateTime.Now;
+            newPatient.UpdatedDate = newPatient.CreatedDate;
             
-            var result = await _db.Patients.AddAsync(model);
+            var result = await _db.Patients.AddAsync(newPatient);
             if( !(result.State == EntityState.Added) ){
                 _logger.LogWarning($"Add new patient unsuccessfully, result state: {result.State}");
                 //(Not implemented) exception handle 
                 return NotFound("Server failed to add new patient");
             }
-            await _db.SaveChangesAsync();
+
+            try
+            {
+                var saveChangeResult = await _db.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Server failed to add new patient");
+                //(Not implemented) exception handle 
+                return NotFound("Server failed to add new patient");
+            }
+
+            _logger.LogInformation($"New patient {newPatient.PatientName} has been added to Customer {currentCustomerId}");
+            
             //(Not implemented) Success view or redirect
-            return RedirectToAction("PatientList");
+            return RedirectToAction("PatientList", new {id = currentCustomerId} );
         }
 
         public IActionResult PatientList(int? custId)
@@ -69,6 +94,7 @@ namespace Childcare.Controllers
             var model = new PatientListViewModel();
             model.Patients = _db.Patients.Where(p => p.CustomerID==custId).ToList();
             if(model.Patients == null || model.Patients.Count == 0){
+                //(Not implement) return some view
                  return NotFound("Customer doesnt have any patient profile yet");
             }
             return View(model);

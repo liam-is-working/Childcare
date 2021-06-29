@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization.Infrastructure;
 
 namespace Childcare.Authorization
 {
-    public static class BlogOperations
+    public static class PatientOperations
     {
         public static OperationAuthorizationRequirement Create =   
           new OperationAuthorizationRequirement {Name=Constants.CreateOperationName};
@@ -18,4 +18,5 @@ namespace Childcare.Authorization
           new OperationAuthorizationRequirement {Name=Constants.RejectOperationName};
     }
 
+    
 }

@@ -8,9 +8,12 @@ namespace Childcare.Models
     public class PatientCreateViewModel
     {   
         [Required]
-        [StringLength(50)]
         public string PatientName { get; set; }
+        [Required]
         public int Gender { get; set; }
+        [Required]
+        [DataType(DataType.Date)]
+        public DateTime Birthday { get; set; }
         
     }
 }

@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "Tdk2zWxClxGmebiWUbT4sMeXtga4Zn70J9tUGZafZY3m7rP8EJZ1V5NBlzCma70DSTSlugjYrbuG0sHGUvb7nQ==",
-  "success": false,
-  "projectFilePath": "d:\\Study_material\\C#\\ChildCareProject\\Childcare\\Childcare.csproj",
+  "dgSpecHash": "+MCzjjFc8VDe7PvdD9PiCF8W863GFR7B3ieAwJpyuGE2iBbJ3B4LUhEwMqjlP9ct9zolmrFi69T6Usg/zKSn5w==",
+  "success": true,
+  "projectFilePath": "D:\\Study_material\\C#\\ChildCareProject\\Childcare\\Childcare.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\ACER\\.nuget\\packages\\microsoft.aspnetcore.cryptography.internal\\3.1.0\\microsoft.aspnetcore.cryptography.internal.3.1.0.nupkg.sha512",
     "C:\\Users\\ACER\\.nuget\\packages\\microsoft.aspnetcore.cryptography.keyderivation\\3.1.0\\microsoft.aspnetcore.cryptography.keyderivation.3.1.0.nupkg.sha512",
-    "C:\\Users\\ACER\\.nuget\\packages\\microsoft.aspnetcore.diagnostics.entityframeworkcore\\5.0.0\\microsoft.aspnetcore.diagnostics.entityframeworkcore.5.0.0.nupkg.sha512",
+    "C:\\Users\\ACER\\.nuget\\packages\\microsoft.aspnetcore.diagnostics.entityframeworkcore\\3.1.0\\microsoft.aspnetcore.diagnostics.entityframeworkcore.3.1.0.nupkg.sha512",
     "C:\\Users\\ACER\\.nuget\\packages\\microsoft.aspnetcore.html.abstractions\\2.2.0\\microsoft.aspnetcore.html.abstractions.2.2.0.nupkg.sha512",
     "C:\\Users\\ACER\\.nuget\\packages\\microsoft.aspnetcore.identity.entityframeworkcore\\3.1.0\\microsoft.aspnetcore.identity.entityframeworkcore.3.1.0.nupkg.sha512",
     "C:\\Users\\ACER\\.nuget\\packages\\microsoft.aspnetcore.identity.ui\\3.1.0\\microsoft.aspnetcore.identity.ui.3.1.0.nupkg.sha512",
@@ -167,15 +167,5 @@
     "C:\\Users\\ACER\\.nuget\\packages\\system.xml.xmldocument\\4.3.0\\system.xml.xmldocument.4.3.0.nupkg.sha512",
     "C:\\Users\\ACER\\.nuget\\packages\\system.xml.xmlserializer\\4.3.0\\system.xml.xmlserializer.4.3.0.nupkg.sha512"
   ],
-  "logs": [
-    {
-      "code": "NU1202",
-      "level": "Error",
-      "message": "Package Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore 5.0.0 is not compatible with netcoreapp3.1 (.NETCoreApp,Version=v3.1). Package Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore 5.0.0 supports: net5.0 (.NETCoreApp,Version=v5.0)",
-      "libraryId": "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore",
-      "targetGraphs": [
-        ".NETCoreApp,Version=v3.1"
-      ]
-    }
-  ]
+  "logs": []
 }
