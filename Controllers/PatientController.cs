@@ -35,6 +35,7 @@ namespace Childcare.Controllers
         //(not implemented) create model pls
         public async Task<IActionResult> PatientCreateAsync(PatientCreateViewModel model){          
             if(!ModelState.IsValid){
+                
                 //Serverside validation
                 return View(model);
             }
