@@ -14,6 +14,10 @@ namespace Childcare.Models
         [Required]
         [DataType(DataType.Date)]
         public DateTime Birthday { get; set; }
-        
+        //Set ownerId in view if Customer create Patient profile    
+        [Required]
+        public int OwnerId {get;set;}
+        //Use this property to get Customer list for Staff/Manager to choose
+        public List<Customer> Customers { get; internal set; }
     }
 }

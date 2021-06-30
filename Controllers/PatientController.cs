@@ -9,62 +9,80 @@ using Childcare.Models;
 using Childcare.Areas.Identity.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
+using System.ComponentModel.DataAnnotations;
+using Childcare.Authorization;
 
 namespace Childcare.Controllers
 {
+    [Authorize]
     public class PatientController : Controller
     {
         private readonly ILogger<HomeController> _logger;
         private readonly ChildCareContext _db;
         private readonly UserManager<ChildCareUser> _um;
+        private readonly IAuthorizationService _autho;
 
-        public PatientController(ILogger<HomeController> logger, ChildCareContext db, UserManager<ChildCareUser> um)
+        [TempData]
+        public int CustomerId { get; set; }
+
+        public PatientController(ILogger<HomeController> logger, ChildCareContext db, UserManager<ChildCareUser> um,
+                                DefaultAuthorizationService autho)
         {
             _logger = logger;
             _db = db;
             _um = um;
+            _autho = autho;
         }
 
         [HttpGet]
-        public IActionResult PatientCreate(){
+        public IActionResult PatientCreate()
+        {
+            //For higher role to create patient profile
+            if (User.IsInRole("Manager") || User.IsInRole("Staff"))
+            {
+                var model = new PatientCreateViewModel();
+                model.Customers = _db.Customers.ToList();
+                //Add 'choose owner' option into view
+                return View(model);
+            }
+            else
+            {
+                //Save customer id in tempdata for view user
+                CustomerId = _db.Customers.First(c => c.ChildcareUserId == _um.GetUserId(User)).CustomerID;
+            }
             //return form to create new patient
             return View();
         }
 
         [HttpPost]
-        //(not implemented) create model pls
-        public async Task<IActionResult> PatientCreateAsync(PatientCreateViewModel model){          
-            if(!ModelState.IsValid){
-                
+        public async Task<IActionResult> PatientCreateAsync(PatientCreateViewModel model)
+        {
+
+            if (!ModelState.IsValid)
+            {
                 //Serverside validation
                 return View(model);
             }
 
             var currentUserId = _um.GetUserId(User);
-            if(currentUserId == null){
+            if (currentUserId == null)
+            {
                 return NotFound("Current user is not valid");
             }
 
             Patient newPatient = new Patient();
 
-            int currentCustomerId;
-            try{
-                currentCustomerId = _db.Customers
-                .First(c => c.ChildcareUserId == currentUserId).CustomerID;
-                newPatient.CustomerID = currentCustomerId;
-            }
-            catch (InvalidOperationException){
-                return NotFound("Current user is not valid");
-            }
-
+            newPatient.CustomerID = model.OwnerId;
             newPatient.Gender = model.Gender;
             newPatient.PatientName = model.PatientName;
             newPatient.Birthday = model.Birthday;
             newPatient.CreatedDate = DateTime.Now;
             newPatient.UpdatedDate = newPatient.CreatedDate;
-            
+
             var result = await _db.Patients.AddAsync(newPatient);
-            if( !(result.State == EntityState.Added) ){
+            if (!(result.State == EntityState.Added))
+            {
                 _logger.LogWarning($"Add new patient unsuccessfully, result state: {result.State}");
                 //(Not implemented) exception handle 
                 return NotFound("Server failed to add new patient");
@@ -81,43 +99,73 @@ namespace Childcare.Controllers
                 return NotFound("Server failed to add new patient");
             }
 
-            _logger.LogInformation($"New patient {newPatient.PatientName} has been added to Customer {currentCustomerId}");
-            
+            _logger.LogInformation($"New patient {newPatient.PatientName} has been added to Customer {model.OwnerId}");
+
             //(Not implemented) Success view or redirect
-            return RedirectToAction("PatientList", new {id = currentCustomerId} );
+            return RedirectToAction("PatientList", new { id = model.OwnerId });
         }
 
-        public IActionResult PatientList(int? custId)
+        public async Task<IActionResult> PatientListAsync(int? custId)
         {
-            //(Not implement) only creator and higher roles can see his patient list 
-            if(custId == null)
+            //Customer request for list but no ownerId specified
+            if (custId == null && !User.IsInRole("Manager") && !User.IsInRole("Staff"))
                 return NotFound("Please insert Cutomer id");
+
+
+
             var model = new PatientListViewModel();
-            model.Patients = _db.Patients.Where(p => p.CustomerID==custId).ToList();
-            if(model.Patients == null || model.Patients.Count == 0){
-                //(Not implement) return some view
-                 return NotFound("Customer doesnt have any patient profile yet");
+
+            //Manager and staff request for list(s) of patient
+            if (User.IsInRole("Manager") || User.IsInRole("Staff"))
+            {
+                //Request for all patient => no parameter 
+                if (custId == null)
+                {
+                    model.Patients = await _db.Patients.ToListAsync();
+                    //Empty list approach
+                    return View(model);
+                }
+
+                //Request for a user's patient list
+                model.Patients = await _db.Patients.Where(p => p.CustomerID == custId).ToListAsync();
+                //Empty list approach
+                return View(model);
             }
-            return View(model);
+            //Customer request for a list of patient
+            else
+            {
+                
+                var ownerId = (await _db.Customers
+                        .FirstAsync(cust => cust.ChildcareUserId == _um.GetUserId(User)))
+                        .CustomerID;
+                //Customer request for list that he doesnt own
+                if (custId != ownerId)
+                    return Forbid();
+                
+                //Customer request for his list of Patients
+                model.Patients = await _db.Patients.Where(p => p.CustomerID == custId).ToListAsync();
+                return View(model);
+            }
         }
 
+        [HttpGet]
         public IActionResult PatientDetail(int? patientId)
         {
-            //User.
-           //(Not implement) only creator and higher roles can see his patient list 
-            if(patientId == null)
+            //_autho.AuthorizeAsync(user: User, requirement: PatientOperations.)
+
+            if (patientId == null)
                 return NotFound("Please insert patient id");
             var model = new PatientDetailViewModel();
             try
             {
-                model.Patient = _db.Patients.Where(p=>p.PatientID==patientId).Include(p=>p.Reservations).ToArray()[0];
+                model.Patient = _db.Patients.Where(p => p.PatientID == patientId).Include(p => p.Reservations).ToArray()[0];
             }
             catch (InvalidOperationException)
             {
-                
+
                 return NotFound("Patient Id does not exist");
             }
-            
+
             return View(model);
         }
 
