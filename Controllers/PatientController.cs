@@ -105,6 +105,7 @@ namespace Childcare.Controllers
             return RedirectToAction("PatientList", new { id = model.OwnerId });
         }
 
+        [HttpGet]
         public async Task<IActionResult> PatientListAsync(int? custId)
         {
             //Customer request for list but no ownerId specified
@@ -148,6 +149,68 @@ namespace Childcare.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<IActionResult> PatientDetailAsync(PatientDetailViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                //(Not implement) Server validation
+                return View();
+            }
+
+            Patient oldPatient;
+            try
+            {
+                oldPatient = await _db.Patients.FirstAsync(p => p.PatientID == model.PatientID);
+            }
+            catch (InvalidOperationException)
+            {
+
+                return NotFound("Patient Id does not exist");
+            }
+
+            //Authorize
+            var isAuthorized = User.IsInRole("Manager") || User.IsInRole("Staff");
+
+            if (!isAuthorized)
+            {
+                var custId = await GetCurrentCustomerIdAsync();
+                if (custId != model.Patient.CustomerID)
+                    return Forbid();
+            }
+
+            //Update patient
+            var newPatient = new Patient
+            {
+                //unchangable
+                PatientID = oldPatient.PatientID,
+                CustomerID = oldPatient.CustomerID,
+                CreatedDate = oldPatient.CreatedDate,
+                //changable
+                PatientName = model.PatientName,
+                Birthday = model.Birthday,
+                Gender = model.Gender,
+                UpdatedDate = DateTime.Now
+                
+            };
+
+            try
+            {
+                _db.Update(newPatient);
+                var result = await _db.SaveChangesAsync();
+                if (result != 1)
+                    _logger.LogWarning("Update Patient but no change is made in database");
+
+            }
+            catch (Exception e)
+            {
+                _logger.LogError($"Update Patient: {e.Message}");
+                return Error();
+            }
+
+            return RedirectToAction("PatientDetail", new { patientId = model.PatientID });
+        }
+
         public async Task<IActionResult> PatientDeleteAsync([Required] int[] patientIds)
         {
             var patients = new List<Patient>();
@@ -188,25 +251,33 @@ namespace Childcare.Controllers
             }
 
             //Redirect cust to his own list
-            return RedirectToAction("PatientList", new{custId = patients[0].CustomerID});
+            return RedirectToAction("PatientList", new { custId = patients[0].CustomerID });
         }
 
         [HttpGet]
-        public IActionResult PatientDetail(int? patientId)
+        public async Task<IActionResult> PatientDetailAsync(int? patientId)
         {
-            //_autho.AuthorizeAsync(user: User, requirement: PatientOperations.)
-
             if (patientId == null)
                 return NotFound("Please insert patient id");
+
             var model = new PatientDetailViewModel();
             try
             {
-                model.Patient = _db.Patients.Where(p => p.PatientID == patientId).Include(p => p.Reservations).ToArray()[0];
+                model.Patient = await _db.Patients.FirstAsync(p => p.PatientID == patientId);
             }
             catch (InvalidOperationException)
             {
 
                 return NotFound("Patient Id does not exist");
+            }
+
+            var isAuthorized = User.IsInRole("Manager") || User.IsInRole("Staff");
+
+            if (!isAuthorized)
+            {
+                var custId = await GetCurrentCustomerIdAsync();
+                if (custId != model.Patient.CustomerID)
+                    return Forbid();
             }
 
             return View(model);
@@ -217,5 +288,22 @@ namespace Childcare.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+        async Task<int> GetCurrentCustomerIdAsync()
+        {
+            var userId = _um.GetUserId(User);
+            try
+            {
+                var customerId = (await _db.Customers.Select(c => new { c.CustomerID, c.ChildcareUserId })
+                                .FirstAsync(a => a.ChildcareUserId.Equals(userId))).CustomerID;
+                return customerId;
+            }
+            catch (InvalidOperationException)
+            {
+                _logger.LogWarning("User is not a customer or an UserId is invalid");
+                throw new Exception("User is not a customer or an UserId is invalid");
+            }
+        }
+
     }
 }
