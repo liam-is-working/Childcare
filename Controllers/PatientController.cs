@@ -18,7 +18,7 @@ namespace Childcare.Controllers
     [Authorize]
     public class PatientController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly ILogger<PatientController> _logger;
         private readonly ChildCareContext _db;
         private readonly UserManager<ChildCareUser> _um;
         private readonly IAuthorizationService _autho;
@@ -26,7 +26,7 @@ namespace Childcare.Controllers
         [TempData]
         public int CustomerId { get; set; }
 
-        public PatientController(ILogger<HomeController> logger, ChildCareContext db, UserManager<ChildCareUser> um,
+        public PatientController(ILogger<PatientController> logger, ChildCareContext db, UserManager<ChildCareUser> um,
                                 DefaultAuthorizationService autho)
         {
             _logger = logger;

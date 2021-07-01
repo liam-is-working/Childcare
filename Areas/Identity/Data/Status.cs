@@ -23,4 +23,10 @@ namespace Childcare.Areas.Identity.Data
         public virtual ICollection<Service> Services { get; set; }
 
     }
+
+    public enum StatusName{
+        Approved,
+        Rejected,
+        Pending
+    }
 }
