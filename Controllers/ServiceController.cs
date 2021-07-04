@@ -49,6 +49,44 @@ namespace Childcare.Controllers
             }
         }
 
+        public async Task<IActionResult> GetServiceDetailAsync(int? serviceId)
+        {
+            if (!serviceId.HasValue)
+                return BadRequest("Must specify service Id");
+
+            var isAuthorized = (User.IsInRole("Manager") || User.IsInRole("Staff"));
+            //Model contains a service with its feedbacks and its specialty
+            if (!isAuthorized)
+            {
+                //Hardcode map Status table and statusName enum
+                //Customer can only see approved service
+                var serviceQueryResult = await _db.Services
+                                                .Where(s => s.ServiceID == serviceId && s.StatusID == ((int)StatusName.Approved))
+                                                .Include(s => s.Feedbacks)
+                                                .Include(s => s.Specialty)
+                                                .ToArrayAsync();
+                if (serviceQueryResult.Count() != 1)
+                    return BadRequest("No approved serviceId found");
+
+                var model = serviceQueryResult[0];
+
+                return View(model);
+            }
+            else
+            {
+                //Staff and Manager can see all services
+                var model = await _db.Services
+                    .Include(s => s.Specialty)
+                    .Include(s => s.Status)
+                    .FirstOrDefaultAsync(s => s.ServiceID == serviceId);
+
+                if(model==null)
+                    return BadRequest("No serviceId found");
+
+                return View(model);
+            }
+        }
+
         [HttpGet]
         [Authorize(Roles = "Manager, Staff")]
         public async Task<IActionResult> EditService(int? serviceId)
@@ -76,7 +114,7 @@ namespace Childcare.Controllers
             if (User.IsInRole("Staff"))
             {
                 //Staff can only edit rejected or pending services
-                if(model.Service.StatusID == ((int)StatusName.Approved))
+                if (model.Service.StatusID == ((int)StatusName.Approved))
                     return BadRequest("Staff can only edit rejected or pending services");
 
                 var currentStaffId = (await _db.Staffs.Select(staff => new { staff.StaffID, staff.ChildcareUserId })
@@ -121,7 +159,7 @@ namespace Childcare.Controllers
             if (User.IsInRole("Staff"))
             {
                 //Staff can only edit rejected or pending services
-                if(oldService.StatusID == ((int)StatusName.Approved))
+                if (oldService.StatusID == ((int)StatusName.Approved))
                     return BadRequest("Staff can only edit rejected or pending services");
 
                 var currentStaffId = (await _db.Staffs.Select(staff => new { staff.StaffID, staff.ChildcareUserId })
@@ -169,7 +207,8 @@ namespace Childcare.Controllers
         {
             var specialties = await _db.Specialties.ToListAsync();
             //pass specialty list for user to choose
-            var model = new CreateServiceViewModel{
+            var model = new CreateServiceViewModel
+            {
                 Specialties = specialties,
             };
             return View(model);
@@ -179,7 +218,8 @@ namespace Childcare.Controllers
         [Authorize(Roles = "Staff")]
         public async Task<IActionResult> CreateServiceAsync(CreateServiceViewModel model)
         {
-            if(!ModelState.IsValid){
+            if (!ModelState.IsValid)
+            {
                 //(not implemented) Server validate
                 return View();
             }
@@ -189,7 +229,8 @@ namespace Childcare.Controllers
 
 
             //New service's status is Pending
-            var newService = new Service{
+            var newService = new Service
+            {
                 StaffID = currentStaffId,
                 CreatedDate = timeStamp,
                 UpdatedDate = timeStamp,
@@ -198,13 +239,14 @@ namespace Childcare.Controllers
                 Price = model.Price,
                 Description = model.Description,
                 Thumbnail = model.Thumbnail,
-                StatusID = ((int)StatusName.Pending),               
+                StatusID = ((int)StatusName.Pending),
             };
 
             await _db.AddAsync(newService);
             var result = await _db.SaveChangesAsync();
 
-            if(result!=1){
+            if (result != 1)
+            {
                 _logger.LogWarning("Failed to add new service to dtb");
                 return BadRequest("Valid service to create but Failed to add new service to dtb");
             }
@@ -213,55 +255,60 @@ namespace Childcare.Controllers
         }
 
         [HttpPost]
-        [Authorize (Roles = "Manager")]
-        public async Task<IActionResult> ChangeServiceState([FromBody] int? serviceId, int? statusId){
-            if(!serviceId.HasValue || !statusId.HasValue)
+        [Authorize(Roles = "Manager")]
+        public async Task<IActionResult> ChangeServiceState([FromBody] int? serviceId, int? statusId)
+        {
+            if (!serviceId.HasValue || !statusId.HasValue)
                 return BadRequest("Must specify service and status");
-            
+
             var service = await _db.Services.FindAsync(serviceId);
-            if(service == null)
+            if (service == null)
                 return NotFound("Service doesn't exist in dtb");
 
             //nothing happend if reassasign current status with itself
-            if(service.StatusID == statusId)
-                return RedirectToAction("EditService", new {serviceId = serviceId});
+            if (service.StatusID == statusId)
+                return RedirectToAction("EditService", new { serviceId = serviceId });
 
             //check status
             bool validStat = false;
             foreach (int stat in Enum.GetValues(typeof(StatusName)))
             {
-                if (statusId == stat){
+                if (statusId == stat)
+                {
                     validStat = true;
                     break;
                 }
             }
 
-            if(validStat){
+            if (validStat)
+            {
                 service.StatusID = statusId;
                 service.UpdatedDate = DateTime.Now;
             }
-                
+
             else
             {
                 _logger.LogWarning("Attemp to assign invaid status to service");
                 return BadRequest("Status code is not valid");
             }
-            
+
             _db.Update(service);
             var result = await _db.SaveChangesAsync();
 
-            if(result!=1){
+            if (result != 1)
+            {
                 _logger.LogWarning("Valid state but dtb failed to update");
-                return 
+                return
                 BadRequest("Valid state but dtb failed to update");
             }
 
-            return RedirectToAction("EditService", new {serviceId = serviceId});
-            
+            return RedirectToAction("EditService", new { serviceId = serviceId });
+
         }
         async Task<int> GetCurrentStaffIdAsync()
         {
-            if(!User.IsInRole("Staff")){
+            if (!User.IsInRole("Staff"))
+            {
                 _logger.LogWarning("User is not a staff but attempt to access staff func");
                 throw new Exception("User is not a staff but attempt to access staff func");
             }
@@ -282,7 +329,8 @@ namespace Childcare.Controllers
 
         async Task<int> GetCurrentManagerIdAsync()
         {
-            if(!User.IsInRole("Manager")){
+            if (!User.IsInRole("Manager"))
+            {
                 _logger.LogWarning("User is not a Manager but attempt to access staff func");
                 throw new Exception("User is not a Manager but attempt to access staff func");
             }
@@ -300,6 +348,6 @@ namespace Childcare.Controllers
                 throw new Exception("Can't find ManagerId in dtb but user attempt to access Manager func");
             }
         }
-    
+
     }
 }

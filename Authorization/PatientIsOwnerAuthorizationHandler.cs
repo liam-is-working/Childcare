@@ -6,11 +6,11 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Childcare.Authorization
 {
-    public class PatientIsOwnerAuthenticationHandller : AuthorizationHandler<OperationAuthorizationRequirement, Patient>
+    public class PatientIsOwnerAuthorizationHandler : AuthorizationHandler<OperationAuthorizationRequirement, Patient>
     {
        UserManager<ChildCareUser> _um;
 
-       PatientIsOwnerAuthenticationHandller(UserManager<ChildCareUser> userManager){
+       PatientIsOwnerAuthorizationHandler(UserManager<ChildCareUser> userManager){
           _um = userManager;
        }
        

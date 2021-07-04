@@ -5,9 +5,8 @@ using Microsoft.AspNetCore.Authorization.Infrastructure;
 
 namespace Childcare.Authorization
 {
-    public class PatientStaffAuthenticationHandller : AuthorizationHandler<OperationAuthorizationRequirement, Patient>
-    {
-       
+    public class PatientManagerAuthorizationHander : AuthorizationHandler<OperationAuthorizationRequirement, Patient>
+    {  
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context,
                             OperationAuthorizationRequirement requirement, Patient resource)
         {
@@ -18,9 +17,9 @@ namespace Childcare.Authorization
             if (requirement.Name != Constants.ReadOperationName)
                 return Task.CompletedTask;
 
-            if(context.User.IsInRole("Staff"))
+            if(context.User.IsInRole("Manager"))
                 context.Succeed(requirement);
-                
+
             return Task.CompletedTask;           
             
         }
