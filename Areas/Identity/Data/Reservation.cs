@@ -18,10 +18,11 @@ namespace Childcare.Areas.Identity.Data
         public int? PatientID { get; set; }
         public int ServiceID { get; set; }
         public int? StaffAssignedID { get; set; }
-        public DateTime OpenTime { get; set; }
         public DateTime CheckInTime { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime UpdatedDate { get; set; }
+        public DateTime ReservationDate{get;set;}
+        public int ReservationSlot{get;set;}
 
         [ForeignKey(nameof(CustomerID))]
         [InverseProperty("Reservations")]

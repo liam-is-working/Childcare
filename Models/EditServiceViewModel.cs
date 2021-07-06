@@ -21,5 +21,12 @@ namespace Childcare.Controllers
         public string Thumbnail { get; set; }
         [Required]
         public string Description { get; set; }
+        [Required]
+        public DateTime StartTime {get;set;}
+        [Required]
+        public DateTime EndTime {get;set;}
+        [Required]
+        //in minute
+        public int ServiceTime{get;set;}
     }
 }

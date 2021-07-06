@@ -27,7 +27,10 @@ namespace Childcare.Areas.Identity.Data
         public DbSet<Service> Services { get; set; }
         public DbSet<Specialty> Specialties { get; set; }
         public DbSet<Staff> Staffs { get; set; }
+
+        public DbSet<ReservationTime> ReservationTimes {get;set;}
         public DbSet<Status> Statuses { get; set; }
+        
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -36,6 +39,7 @@ namespace Childcare.Areas.Identity.Data
             // For example, you can rename the ASP.NET Identity table names and more.
             // Add your customizations after calling base.OnModelCreating(builder);
             builder.Entity<ChildCareUser>().Property(c => c.Id).HasColumnName("ChildCareUserId");
+            builder.Entity<ReservationTime>().HasKey("Date", "ServiceID", "Slot");
 
             // builder.Entity<Administrator>()
             //    .HasOne(t => t.ChildcareUserId);

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Childcare.Areas.Identity.Data;
@@ -20,6 +21,13 @@ namespace Childcare.Models
         public string Description { get; set; }
         [Required]
         public float Price { get; set; }
+        [Required]
+        public DateTime StartTime {get;set;}
+        [Required]
+        public DateTime EndTime {get;set;}
+        [Required]
+        //in minute
+        public int ServiceTime{get;set;}
 
     }
 }

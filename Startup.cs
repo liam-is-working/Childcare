@@ -27,9 +27,9 @@ namespace Childcare
         {
             services.AddControllersWithViews();
 
-            services.AddScoped<IAuthorizationHandler, PatientIsOwnerAuthorizationHandler>();
-            services.AddSingleton<IAuthorizationHandler, PatientManagerAuthorizationHander>();
-            services.AddScoped<IAuthorizationHandler, PatientStaffAuthorizationHandler>();
+            // services.AddSingleton<IAuthorizationHandler, PatientIsOwnerAuthorizationHandler>();
+            // services.AddSingleton<IAuthorizationHandler, PatientManagerAuthorizationHander>();
+            // services.AddSingleton<IAuthorizationHandler, PatientStaffAuthorizationHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

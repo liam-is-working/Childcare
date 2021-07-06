@@ -188,6 +188,9 @@ namespace Childcare.Controllers
                 UpdatedDate = DateTime.Now,
                 Description = model.Description,
                 Thumbnail = model.Thumbnail,
+                StartTime = model.StartTime,
+                EndTime = model.EndTime,
+                ServiceTime = model.ServiceTime
             };
 
             _db.Update(updatedService);
@@ -240,6 +243,9 @@ namespace Childcare.Controllers
                 Description = model.Description,
                 Thumbnail = model.Thumbnail,
                 StatusID = ((int)StatusName.Pending),
+                StartTime = model.StartTime,
+                EndTime = model.EndTime,
+                ServiceTime = model.ServiceTime
             };
 
             await _db.AddAsync(newService);
