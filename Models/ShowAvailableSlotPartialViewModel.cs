@@ -1,18 +1,14 @@
 using System;
+using System.Collections.Generic;
 
 namespace Childcare.Models
 {
     public class ShowAvailableSlotPartialViewModel{
-        
+        public IDictionary<int,Slot> Slots {get;set;}
     }
 
-    // public struct Slot{
-    //     public Slot(int intervalInMinute){
-    //         _intervalInMinute = TimeSpan.FromMinutes(intervalInMinute);
-    //     }
-
-    //     TimeSpan _intervalInMinute{get;set;}
-    //     public int SlotNumber{get;set;}
-    //     public int SlotTime{get;set;}
-    // }
+    public struct Slot{
+        public DateTime StartTime{get; set;}
+        public DateTime EndTime{get; set;}
+    }
 }
