@@ -10,7 +10,7 @@ namespace Childcare.Authorization
     {
        UserManager<ChildCareUser> _um;
 
-       PatientIsOwnerAuthorizationHandler(UserManager<ChildCareUser> userManager){
+      public PatientIsOwnerAuthorizationHandler(UserManager<ChildCareUser> userManager){
           _um = userManager;
        }
        

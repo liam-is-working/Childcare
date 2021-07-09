@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Childcare.Areas.Identity.Data;
 
-namespace Childcare.Controllers
+namespace Childcare.Models
 {
-    public class ServiceEditViewModel{
+    public class EditServiceViewModel{
         //To show current properties of a service
         public Service Service{get;set;}
         //Controller provide a list of specialty to choose from
@@ -28,5 +28,7 @@ namespace Childcare.Controllers
         [Required]
         //in minute
         public int ServiceTime{get;set;}
+        [Required]
+        public float Price {get;set;}
     }
 }

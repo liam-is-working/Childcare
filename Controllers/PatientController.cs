@@ -26,8 +26,9 @@ namespace Childcare.Controllers
         [TempData]
         public int CustomerId { get; set; }
 
-        public PatientController(ILogger<PatientController> logger, ChildCareContext db, UserManager<ChildCareUser> um,
-                                DefaultAuthorizationService autho)
+        public PatientController(ILogger<PatientController> logger, ChildCareContext db, 
+                UserManager<ChildCareUser> um,
+                IAuthorizationService autho                )
         {
             _logger = logger;
             _db = db;
@@ -38,21 +39,20 @@ namespace Childcare.Controllers
         [HttpGet]
         public IActionResult PatientCreate()
         {
+            var model = new PatientCreateViewModel();
             //For higher role to create patient profile
             if (User.IsInRole("Manager") || User.IsInRole("Staff"))
             {
-                var model = new PatientCreateViewModel();
+                
                 model.Customers = _db.Customers.ToList();
                 //Add 'choose owner' option into view
-                return View(model);
             }
             else
             {
-                //Save customer id in tempdata for view user
-                CustomerId = _db.Customers.First(c => c.ChildcareUserId == _um.GetUserId(User)).CustomerID;
+                model.OwnerId = _db.Customers.First(c => c.ChildcareUserId == _um.GetUserId(User)).CustomerID;
             }
             //return form to create new patient
-            return View();
+            return View(model);
         }
 
         [HttpPost]
@@ -109,8 +109,8 @@ namespace Childcare.Controllers
         public async Task<IActionResult> PatientListAsync(int? custId)
         {
             //Customer request for list but no ownerId specified
-            if (custId == null && !User.IsInRole("Manager") && !User.IsInRole("Staff"))
-                return NotFound("Please insert Cutomer id");
+            if (custId != null && !User.IsInRole("Manager") && !User.IsInRole("Staff"))
+                return BadRequest("Customer can only see his patient list");
 
 
 
@@ -139,12 +139,9 @@ namespace Childcare.Controllers
                 var ownerId = (await _db.Customers
                         .FirstAsync(cust => cust.ChildcareUserId == _um.GetUserId(User)))
                         .CustomerID;
-                //Customer request for list that he doesnt own
-                if (custId != ownerId)
-                    return Forbid();
 
                 //Customer request for his list of Patients
-                model.Patients = await _db.Patients.Where(p => p.CustomerID == custId).ToListAsync();
+                model.Patients = await _db.Patients.Where(p => p.CustomerID == ownerId).ToListAsync();
                 return View(model);
             }
         }
@@ -231,6 +228,7 @@ namespace Childcare.Controllers
                 return Error();
             }
 
+            //Manager and Staff can delete any patient profile
             if (User.IsInRole("Manager") || User.IsInRole("Staff"))
             {
                 foreach (var p in patients)
@@ -242,16 +240,21 @@ namespace Childcare.Controllers
                 return RedirectToAction("PatientList");
             }
 
+
             foreach (var patient in patients)
             {
                 var isAuthorized = await _autho.AuthorizeAsync(User, patient, PatientOperations.Delete);
                 if (!isAuthorized.Succeeded)
                     return Forbid();
                 _db.Remove(patient);
+                _logger.LogInformation("Removing patient: " + patient.PatientID);
             }
 
+            var result = await _db.SaveChangesAsync();
+            if(result!=patients.Count)
+                _logger.LogWarning("There may be some patient profiles couldn't be deleted on dtb");
             //Redirect cust to his own list
-            return RedirectToAction("PatientList", new { custId = patients[0].CustomerID });
+            return RedirectToAction("PatientList");
         }
 
         [HttpGet]

@@ -25,8 +25,8 @@ namespace Childcare.Areas.Identity.Data
     }
 
     public enum StatusName{
-        Approved,
-        Rejected,
-        Pending
+        Approved = 1,
+        Rejected = 2,
+        Pending = 3
     }
 }

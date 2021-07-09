@@ -1,0 +1,78 @@
+@model Childcare.Models.EditServiceViewModel
+@{
+    ViewData["Title"] = $"Edit service {Model.ServiceName}";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="row">
+    <div class="col-md-4">
+        <table>
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var spec in Model.Specialties)
+        {
+            <tr>
+                    <td>@spec.SpecialtyID</td>
+                    <td>@spec.SpecialtyName</td>
+            </tr>
+        }
+                
+            </tbody>
+        </table>
+        
+        <form method="post" asp-controller="Service"
+                asp-action="EditService">
+            <h4>Edit @Model.ServiceName service.</h4>
+            <hr />
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <input type="hidden" asp-for="ServiceId" value="@Model.Service.ServiceID">
+            <div class="form-group">
+                <label asp-for="SpecialtyID"></label>
+                <input asp-for="SpecialtyID" class="form-control" value="@Model.Service.SpecialtyID"/>
+                <span asp-validation-for="SpecialtyID" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ServiceName"></label>
+                <input asp-for="ServiceName" class="form-control" value="@Model.Service.ServiceName"/>
+                <span asp-validation-for="ServiceName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Thumbnail"></label>
+                <input asp-for="Thumbnail" class="form-control" value="@Model.Service.Thumbnail"/>
+            </div>
+            <div class="form-group">
+                <label asp-for="Description"></label>
+                <input asp-for="Description" class="form-control" value="@Model.Service.Description"/>
+            </div>
+            <div class="form-group">
+                <label asp-for="Price"></label>
+                <input asp-for="Price" class="form-control" value="@Model.Service.Price"/>
+                <span asp-validation-for="Price" class="text-danger" ></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="StartTime"></label>
+                <input asp-for="StartTime" class="form-control" value="@Model.Service.StartTime"/>
+                <span asp-validation-for="StartTime" class="text-danger" ></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="EndTime"></label>
+                <input asp-for="EndTime" class="form-control" value="@Model.Service.EndTime"/>
+                <span asp-validation-for="EndTime" class="text-danger" ></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ServiceTime"></label>
+                <input asp-for="ServiceTime" class="form-control" value="@Model.Service.ServiceTime"/>
+                <span asp-validation-for="ServiceTime" class="text-danger" ></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Edit</button>
+        </form>
+    </div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

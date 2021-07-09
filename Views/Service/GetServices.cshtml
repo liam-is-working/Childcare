@@ -1,0 +1,63 @@
+@model List<Childcare.Areas.Identity.Data.Service>
+@{
+    ViewData["title"] = "Service";
+}
+
+<h4>@ViewData["Title"]</h4>
+<div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+    <ul class="navbar-nav flex-grow-1">
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="" asp-controller="Service"
+                asp-action="CreateService">CreateService</a>
+        </li>
+</div>
+@if (Model.Count == 0)
+{
+    <div>There's no service</div>
+}
+else
+{
+    foreach (var service in Model)
+    {
+        <div class="card border-dark mb-3" style="max-width: 18rem;">
+            @{
+                string cardBgColor = "bg-success";
+                if (service.StatusID == 2)
+                    cardBgColor = "bg-danger";
+                if (service.StatusID == 3)
+                    cardBgColor = "bg-warning";
+            }
+            <div class="card-header">@service.ServiceName
+                @service.Specialty.SpecialtyName
+            </div>
+            <div class="card-body text-dark @cardBgColor">
+                <div class="card-text">@service.Description</div>
+                <div class="card-text">Start at: @service.StartTime</div>
+                <div class="card-text">End at: @service.EndTime</div>
+                <div class="card-text">Price: @service.Price</div>
+                <div class="card-text">Take: @service.ServiceTime</div>
+                @if (User.IsInRole("Manager"))
+                {
+                    <form asp-controller="Service" asp-action="ChangeServiceState" method="POST">
+                        <label for="status">Choose status</label>
+                        <select name="statusId">
+                            <option value="1">Approved</option>
+                            <option value="2">Rejected</option>
+                            <option value="3">Pending</option>
+                        </select>
+                        <br><br>
+                        <input type="hidden" name="serviceId" value="@service.ServiceID">
+                        <input type="submit" value="Submit">
+                    </form>
+                }
+                @if (User.IsInRole("Manager") || User.IsInRole("Staff"))
+                {
+                    <form asp-action="EditService" method="GET">
+                        <input type="hidden" name="serviceId" value="@service.ServiceID">
+                        <button type="submit">Edit</button>
+                    </form>
+                }
+            </div>
+        </div>
+    }
+}

@@ -27,7 +27,7 @@ namespace Childcare.Controllers
             _um = um;
             _autho = autho;
         }
-
+        [Route("services")]
         public async Task<IActionResult> GetServicesAsync()
         {
             var isAuthorized = (User.IsInRole("Manager") || User.IsInRole("Staff"));
@@ -89,11 +89,11 @@ namespace Childcare.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Manager, Staff")]
-        public async Task<IActionResult> EditService(int? serviceId)
+        public async Task<IActionResult> EditServiceAsync([FromQuery]int? serviceId)
         {
             if (!serviceId.HasValue)
                 return BadRequest("Must specify service Id");
-            var model = new ServiceEditViewModel();
+            var model = new EditServiceViewModel();
 
 
             //Check if service exists in dtb
@@ -130,6 +130,9 @@ namespace Childcare.Controllers
             //(Not implemented) consider using cached 
             model.Specialties = await _db.Specialties.ToListAsync();
 
+            _logger.LogDebug($"{model.Service.StartTime:hh:mm tt}");
+            _logger.LogDebug($"{model.Service.EndTime:hh:mm tt}");
+
 
             //Model is a complete Service instance with Specialties to choose from 
             return View(model);
@@ -137,8 +140,10 @@ namespace Childcare.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Manager, Staff")]
-        public async Task<IActionResult> EditService(ServiceEditViewModel model)
+        public async Task<IActionResult> EditServiceAsync(EditServiceViewModel model)
         {
+            _logger.LogInformation($"service edit _ post called");
+            
 
             //server validation
             if (!ModelState.IsValid)
@@ -175,7 +180,7 @@ namespace Childcare.Controllers
                 newStatus = StatusName.Pending;
             }
 
-
+            //Bug, use old service and make changes based on updated fields
             var updatedService = new Service
             {
                 ServiceID = oldService.ServiceID,
@@ -190,8 +195,13 @@ namespace Childcare.Controllers
                 Thumbnail = model.Thumbnail,
                 StartTime = model.StartTime,
                 EndTime = model.EndTime,
-                ServiceTime = model.ServiceTime
+                ServiceTime = model.ServiceTime,
+                Price = model.Price,
             };
+
+            
+
+
 
             _db.Update(updatedService);
 
@@ -257,12 +267,12 @@ namespace Childcare.Controllers
                 return BadRequest("Valid service to create but Failed to add new service to dtb");
             }
 
-            return View();
+            return RedirectToAction("GetServices");
         }
 
         [HttpPost]
         [Authorize(Roles = "Manager")]
-        public async Task<IActionResult> ChangeServiceState([FromBody] int? serviceId, int? statusId)
+        public async Task<IActionResult> ChangeServiceState(int? serviceId, int? statusId)
         {
             if (!serviceId.HasValue || !statusId.HasValue)
                 return BadRequest("Must specify service and status");
@@ -308,6 +318,7 @@ namespace Childcare.Controllers
                 BadRequest("Valid state but dtb failed to update");
             }
 
+            _logger.LogInformation("Change service state");
             return RedirectToAction("EditService", new { serviceId = serviceId });
 
         }

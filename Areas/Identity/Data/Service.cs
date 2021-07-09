@@ -20,6 +20,7 @@ namespace Childcare.Areas.Identity.Data
         public int? SpecialtyID { get; set; }
         public string Thumbnail { get; set; }
         public string Description { get; set; }
+        
         public float Price { get; set; }
         public int? StatusID { get; set; }
         public DateTime CreatedDate { get; set; }

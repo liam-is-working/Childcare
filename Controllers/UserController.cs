@@ -51,7 +51,7 @@ namespace Childcare.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AssignRole([Required] [FromBody] string userId,[Required] [FromBody] string rolename){
+        public async Task<IActionResult> AssignRole([Required] string userId,[Required] string rolename){
             if(!ModelState.IsValid)
                 return BadRequest("Must specify role and userId");
 
@@ -65,10 +65,35 @@ namespace Childcare.Controllers
             if(role == null)
                 return NotFound("Role is not in dtb");
 
-            var result = await _um.AddToRoleAsync(user, normalizedRoleName);
+            var addRoleResult = await _um.AddToRoleAsync(user, normalizedRoleName);
 
-            if(!result.Succeeded)   
+            if(!addRoleResult.Succeeded)   
                 return BadRequest("Valid state but failed to add user to role");
+
+            if(normalizedRoleName == "MANAGER"){
+                var newManager = new Manager{
+                    ChildcareUserId = _um.GetUserId(User)
+                };
+                await _db.AddAsync(newManager);
+            }
+            else if (normalizedRoleName == "STAFF")
+            {
+                var newStaff = new Staff{
+                    ChildcareUserId = _um.GetUserId(User)
+                };
+                await _db.AddAsync(newStaff);
+            }else 
+            {
+                var newCustomer = new Customer{
+                    ChildcareUserId = _um.GetUserId(User),
+
+                };
+                await _db.AddAsync(newCustomer);
+            }
+            var result = await _db.SaveChangesAsync();
+            if(result!=1){
+                _logger.LogWarning($"Assigned role:{normalizedRoleName} to userId:{userId} success but failed to add new record into Manager/Customer/Staff table");
+            }
 
             return RedirectToAction("UserList");
         }

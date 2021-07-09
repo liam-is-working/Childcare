@@ -15,9 +15,9 @@ namespace Childcare.Models
         public string ServiceName { get; set; }
         [Required]
         public int? SpecialtyID { get; set; }
-        [Required]
+        //[Required]
         public string Thumbnail { get; set; }
-        [Required]
+        //[Required]
         public string Description { get; set; }
         [Required]
         public float Price { get; set; }
