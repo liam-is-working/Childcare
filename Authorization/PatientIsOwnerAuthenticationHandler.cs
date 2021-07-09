@@ -28,8 +28,8 @@ namespace Childcare.Authorization
                 requirement.Name != Constants.UpdateOperationName)
                 return Task.CompletedTask;
 
-            if(resource.Customer == null)
-               throw new System.Exception("Must pass a Patient with its Consumer included");
+            if(resource.Customer.ChildcareUserId == null)
+               throw new System.Exception("Must pass a Patient with its Owner's userId included");
 
             if(resource.Customer.ChildcareUserId == _um.GetUserId(context.User) ){
                context.Succeed(requirement);

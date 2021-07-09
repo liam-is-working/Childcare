@@ -25,16 +25,20 @@ namespace Childcare.Areas.Identity.Pages.Account
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
 
+        private readonly ChildCareContext _db;
+
         public RegisterModel(
             UserManager<ChildCareUser> userManager,
             SignInManager<ChildCareUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            ChildCareContext db)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _db = db;
         }
 
         [BindProperty]
@@ -101,6 +105,26 @@ namespace Childcare.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+
+                    //Create a record in Customer table
+                    var userId = _userManager.GetUserIdAsync(user);
+                    if(userId != null){
+                        var newCustomer = new Customer{
+                            ChildcareUserId = await userId,
+                        };
+                        await _db.AddAsync(newCustomer);
+                        var addNewCustResult = await _db.SaveChangesAsync();
+                        if(addNewCustResult!=1){
+                            _logger.LogError($"Failed to create new customer record with childcareId={newCustomer.ChildcareUserId}");
+                        }else
+                        {
+                            _logger.LogInformation($"Created new customer record with childcareId={newCustomer.ChildcareUserId}");
+                        }
+                    }else
+                    {
+                        _logger.LogError("Cant find userId");
+                    }
+                    
 
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
