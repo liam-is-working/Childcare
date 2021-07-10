@@ -352,3 +352,5 @@ D:\Study_material\C#\ChildCareProject\Childcare\obj\Debug\netcoreapp3.1\Childcar
 D:\Study_material\C#\ChildCareProject\Childcare\obj\Debug\netcoreapp3.1\Childcare.dll
 D:\Study_material\C#\ChildCareProject\Childcare\obj\Debug\netcoreapp3.1\Childcare.pdb
 D:\Study_material\C#\ChildCareProject\Childcare\obj\Debug\netcoreapp3.1\Childcare.genruntimeconfig.cache
+F:\Study At FPTU\5. Summer 2021\PRN211 - Basic Cross-Platform Application Programming With .NET - KiemHH\ChildCare\ChildCare\obj\Debug\netcoreapp3.1\Childcare.dll
+F:\Study At FPTU\5. Summer 2021\PRN211 - Basic Cross-Platform Application Programming With .NET - KiemHH\ChildCare\ChildCare\obj\Debug\netcoreapp3.1\Childcare.pdb
