@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using System.ComponentModel.DataAnnotations;
 using Childcare.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace Childcare.Controllers
 {
