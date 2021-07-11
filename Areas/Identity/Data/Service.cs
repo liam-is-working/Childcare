@@ -12,6 +12,7 @@ namespace Childcare.Areas.Identity.Data
             Feedbacks = new HashSet<Feedback>();
             MedicalExaminations = new HashSet<MedicalExamination>();
             Reservations = new HashSet<Reservation>();
+            ReservationTimes = new HashSet<ReservationTime>();
         }
 
         public int ServiceID { get; set; }
@@ -19,11 +20,16 @@ namespace Childcare.Areas.Identity.Data
         public int? SpecialtyID { get; set; }
         public string Thumbnail { get; set; }
         public string Description { get; set; }
+        
         public float Price { get; set; }
         public int? StatusID { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime UpdatedDate { get; set; }
         public int? StaffID { get; set; }
+        public DateTime StartTime {get;set;}
+        public DateTime EndTime {get;set;}
+        //in minute
+        public int ServiceTime{get;set;}
 
         [ForeignKey(nameof(StaffID))]
         [InverseProperty("Services")]
@@ -39,6 +45,9 @@ namespace Childcare.Areas.Identity.Data
 
         [InverseProperty(nameof(Feedback.Service))]
         public virtual ICollection<Feedback> Feedbacks { get; set; }
+
+        [InverseProperty(nameof(ReservationTime.Service))]
+        public virtual ICollection<ReservationTime> ReservationTimes { get; set; }
 
         [InverseProperty(nameof(Reservation.Service))]
         public virtual ICollection<Reservation> Reservations { get; set; }

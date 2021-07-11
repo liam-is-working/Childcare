@@ -352,3 +352,8 @@ D:\Study_material\C#\ChildCareProject\Childcare\obj\Debug\netcoreapp3.1\Childcar
 D:\Study_material\C#\ChildCareProject\Childcare\obj\Debug\netcoreapp3.1\Childcare.dll
 D:\Study_material\C#\ChildCareProject\Childcare\obj\Debug\netcoreapp3.1\Childcare.pdb
 D:\Study_material\C#\ChildCareProject\Childcare\obj\Debug\netcoreapp3.1\Childcare.genruntimeconfig.cache
+D:\Study_material\C#\ChildCareProject\Childcare\obj\Debug\netcoreapp3.1\Razor\Views\Service\CreateService.cshtml.g.cs
+D:\Study_material\C#\ChildCareProject\Childcare\obj\Debug\netcoreapp3.1\Razor\Views\Service\GetServices.cshtml.g.cs
+D:\Study_material\C#\ChildCareProject\Childcare\obj\Debug\netcoreapp3.1\Razor\Views\Service\EditService.cshtml.g.cs
+D:\Study_material\C#\ChildCareProject\Childcare\obj\Debug\netcoreapp3.1\Razor\Views\Patient\PatientList.cshtml.g.cs
+D:\Study_material\C#\ChildCareProject\Childcare\obj\Debug\netcoreapp3.1\Razor\Views\Patient\PatientCreate.cshtml.g.cs

@@ -1,0 +1,44 @@
+@model Childcare.Models.PatientListViewModel
+@{
+    ViewData["title"] = "Patients";
+}
+
+<h4>@ViewData["Title"]</h4>
+<div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+    <ul class="navbar-nav flex-grow-1">
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="" asp-controller="Patient" asp-action="PatientCreate">Create
+                Patient</a>
+        </li>
+</div>
+@if (Model.Patients.Count == 0)
+{
+    <div>There's no patient</div>
+}
+else
+{
+    foreach (var p in Model.Patients)
+    {
+        <div class="card border-dark mb-3" style="max-width: 18rem;">
+            <div class="card-header">
+                @p.PatientName    
+                @if(User.IsInRole("Staff") || User.IsInRole("Manager"))
+                    @p.CustomerID    
+            </div>
+            <div class="card-body text-dark">
+                <div class="card-text">pOwnerId: @p.CustomerID</div>
+                <div class="card-text">pId: @p.PatientID</div>
+                <div class="card-text">@p.Birthday</div>
+                <div class="card-text">@p.Gender</div>
+            </div>
+        </div>
+    }
+    <form asp-action="PatientDelete">
+        @foreach (var p in Model.Patients)
+        {
+            <input type="checkbox" name="patientIds" id="@p.PatientID" value="@p.PatientID" >
+            <label for="@p.PatientID"> @p.PatientID </label>
+        }
+        <input type="submit" value="submit">
+    </form>
+}

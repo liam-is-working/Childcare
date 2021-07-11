@@ -5,6 +5,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Childcare.Areas.Identity.Data{
+
+    public static class PopulateChildcareData{
+        
+    }
     public static class PopulateIdentityData{
         public static async Task PopulateRolesAsync(IServiceProvider services,string[] roles){
 
