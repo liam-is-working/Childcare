@@ -86,7 +86,7 @@ namespace Childcare.Controllers
                 return BadRequest("Chosen date must be between 12 hours and 10 days after today");
 
             var unavailableSlotNumber = _db.ReservationTimes
-                                .Where(rt => rt.ServiceID == chosenService.ServiceID 
+                                .Where(rt => rt.SpecialtyID == chosenService.SpecialtyID 
                                 && rt.Date == chosenDate && rt.AvailableStaff==0)
                                 .Select(rt => rt.Slot).ToListAsync();
             
@@ -97,16 +97,6 @@ namespace Childcare.Controllers
             if (availableSlots.Count == 0)
                 return PartialView(model);
 
-            //Get unavailable (reserved or unactive)
-            var unavailableSlotNumbers = await _db.ReservationTimes
-                                                .Where(rt => rt.Date == chosenDate && rt.AvailableStaff == 0)
-                                                .Select(rt => rt.Slot).ToArrayAsync();
-
-            //remove unavailable slots from choices
-            foreach (var slotNum in unavailableSlotNumbers)
-            {
-                availableSlots.Remove(slotNum);
-            }
             //Create a model and pass available slots into it
             model.Slots = availableSlots;
 
@@ -152,7 +142,7 @@ namespace Childcare.Controllers
                 return BadRequest("Must specify reservation slot number");  
 
             var unavailableSlotNumber = _db.ReservationTimes
-                                .Where(rt => rt.ServiceID == chosenService.ServiceID 
+                                .Where(rt => rt.SpecialtyID == chosenService.SpecialtyID 
                                 && rt.Date == model.ReservationDate && rt.AvailableStaff==0)
                                 .Select(rt => rt.Slot).ToListAsync();
 
@@ -165,7 +155,7 @@ namespace Childcare.Controllers
 
             //Modify reservation time first
             var reservationTime = await _db.ReservationTimes
-                                .FirstOrDefaultAsync(rt => rt.ServiceID == model.ServiceID && rt.Date == model.ReservationDate && rt.Slot == model.ReservationSlot);
+                                .FirstOrDefaultAsync(rt => rt.SpecialtyID == chosenService.SpecialtyID && rt.Date == model.ReservationDate && rt.Slot == model.ReservationSlot);
 
             if (reservationTime != null)
             {
@@ -180,7 +170,7 @@ namespace Childcare.Controllers
                 var availableStaffs = _db.Staffs.CountAsync(s => s.SpecialtyID == chosenService.SpecialtyID);
                 reservationTime = new ReservationTime
                 {
-                    ServiceID = (int)model.ServiceID,
+                    SpecialtyID = (int)chosenService.SpecialtyID,
                     Slot = (int)model.ReservationSlot,
                     Date = model.ReservationDate,
                     AvailableStaff = await availableStaffs,
@@ -190,10 +180,10 @@ namespace Childcare.Controllers
             var newReservation = new Reservation
             {
                 PatientID = model.PatientID,
-                ServiceID = model.ServiceID,
+                ServiceID = (int)model.ServiceID,
                 CustomerID = model.CustomerID,
                 ReservationDate = model.ReservationDate,
-                ReservationSlot = model.ReservationSlot,
+                ReservationSlot = (int)model.ReservationSlot,
                 CreatedDate = DateTime.Now,
                 UpdatedDate = DateTime.Now,
                 //fix later

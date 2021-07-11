@@ -11,6 +11,7 @@ namespace Childcare.Areas.Identity.Data
         {
             Staffs = new HashSet<Staff>();
             Services = new HashSet<Service>();
+            ReservationTimes = new HashSet<ReservationTime>();
         }
         [Key]
         public int SpecialtyID { get; set; }
@@ -21,5 +22,8 @@ namespace Childcare.Areas.Identity.Data
 
         [InverseProperty(nameof(Service.Specialty))]
         public virtual ICollection<Service> Services { get; set; }
+
+        [InverseProperty(nameof(ReservationTime.Specialty))]
+        public virtual ICollection<ReservationTime> ReservationTimes { get; set; }
     }
 }

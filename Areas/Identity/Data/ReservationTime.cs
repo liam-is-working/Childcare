@@ -6,13 +6,13 @@ namespace Childcare.Areas.Identity.Data
 {
     public class ReservationTime{   
         public DateTime Date{get;set;}      
-        public int ServiceID{get;set;}
+        public int SpecialtyID{get;set;}
         public int Slot{get;set;}
         public int AvailableStaff{get;set;}
 
-        [ForeignKey(nameof(ServiceID))]
+        [ForeignKey(nameof(SpecialtyID))]
         [InverseProperty("ReservationTimes")]
-        public virtual Service Service { get; set; }
+        public virtual Specialty Specialty { get; set; }
         
     }
 }

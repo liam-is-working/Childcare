@@ -12,7 +12,6 @@ namespace Childcare.Areas.Identity.Data
             Feedbacks = new HashSet<Feedback>();
             MedicalExaminations = new HashSet<MedicalExamination>();
             Reservations = new HashSet<Reservation>();
-            ReservationTimes = new HashSet<ReservationTime>();
         }
 
         public int ServiceID { get; set; }
@@ -45,9 +44,6 @@ namespace Childcare.Areas.Identity.Data
 
         [InverseProperty(nameof(Feedback.Service))]
         public virtual ICollection<Feedback> Feedbacks { get; set; }
-
-        [InverseProperty(nameof(ReservationTime.Service))]
-        public virtual ICollection<ReservationTime> ReservationTimes { get; set; }
 
         [InverseProperty(nameof(Reservation.Service))]
         public virtual ICollection<Reservation> Reservations { get; set; }
