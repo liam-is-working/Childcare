@@ -36,25 +36,18 @@ else
                 <div class="card-text">End at: @service.EndTime</div>
                 <div class="card-text">Price: @service.Price</div>
                 <div class="card-text">Take: @service.ServiceTime</div>
-                @if (User.IsInRole("Manager"))
-                {
-                    <form asp-controller="Service" asp-action="ChangeServiceState" method="POST">
-                        <label for="status">Choose status</label>
-                        <select name="statusId">
-                            <option value="1">Approved</option>
-                            <option value="2">Rejected</option>
-                            <option value="3">Pending</option>
-                        </select>
-                        <br><br>
-                        <input type="hidden" name="serviceId" value="@service.ServiceID">
-                        <input type="submit" value="Submit">
-                    </form>
-                }
+                <partial name="_ChangeServiceStatePartial" model="@service.ServiceID"/>
                 @if (User.IsInRole("Manager") || User.IsInRole("Staff"))
                 {
                     <form asp-action="EditService" method="GET">
                         <input type="hidden" name="serviceId" value="@service.ServiceID">
                         <button type="submit">Edit</button>
+                    </form>
+                }else{
+                    <form asp-controller="Reservation" asp-action="ShowAvailableSlot" method="GET">
+                        <input type="hidden" name="model.ServiceId" value="@service.ServiceID">                      
+                        <button type="submit">Show available slot for </button>
+                        <input type="date" name="model.ChosenDate" >
                     </form>
                 }
             </div>

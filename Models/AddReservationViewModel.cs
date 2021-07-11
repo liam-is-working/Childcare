@@ -15,18 +15,17 @@ namespace Childcare.Models
         //To display a service detail
         
         public Service Service {get;set;}
-        [Required]
         public int CustomerID { get; set; }
         [Required]
         public int? PatientID { get; set; }
         [Required]
-        public int ServiceID { get; set; }
+        public int? ServiceID { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime UpdatedDate { get; set; }
         [Required]
         public DateTime ReservationDate{get;set;}
         [Required]
-        public int ReservationSlot{get;set;}
+        public int? ReservationSlot{get;set;}
     }
 
 }

@@ -30,5 +30,7 @@ namespace Childcare.Models
         public int ServiceTime{get;set;}
         [Required]
         public float Price {get;set;}
+        [Required]
+        public int StaffOwnerId{get;set;}
     }
 }

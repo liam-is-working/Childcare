@@ -1,0 +1,69 @@
+@model Childcare.Models.UserListViewModel
+@{
+    ViewData["title"] = "Childcare user";
+}
+
+<h4>@ViewData["Title"]</h4>
+@if (Model.Customers.Count == 0)
+{
+    <div>There's no customer</div>
+}
+else
+{
+    <h3>Customer List:</h3>
+    foreach (var c in Model.Customers)
+    {
+        <div class="card border-dark mb-3" style="max-width: 18rem;">
+            <div class="card-header">
+                UserId: @c.ChildcareUserId
+                Customer email: @c.ChildCareUser.Email
+                CustomerId: @c.CustomerID
+            </div>
+            <div class="card-body text-dark">
+                <div class="card-text">Full name: @c.ChildCareUser.FullName</div>
+                <div class="card-text">PhoneNum: @c.ChildCareUser.Address</div>
+            </div>
+        </div>
+    }
+}
+
+<form method="POST">
+    <label id="userId">Choose userId to assign staff role</label>
+    <input type="text" name="userId" id="userId">
+    <button type="submit" asp-controller="User" asp-action="AssignStaffRole">Assign Staff Role</button>
+</form>
+
+@if (Model.Staffs.Count == 0)
+{
+    <div>There's no staff</div>
+}
+else
+{
+    <h3>Staff List:</h3>
+    foreach (var s in Model.Staffs)
+    {
+        <div class="card border-dark mb-3" style="max-width: 18rem;">
+            <div class="card-header">
+                UserId: @s.ChildcareUserId
+                Staff email: @s.ChildCareUser.Email
+                Staff Id: @s.StaffID
+            </div>
+            <div class="card-body text-dark">
+                <div class="card-text">Full name: @s.ChildCareUser.FullName</div>
+                <div class="card-text">PhoneNum: @s.ChildCareUser.Address</div>
+                <form action="AssignSpecialtyToStaff" method="POST">
+                    Spec Id: <input type="text" name="specialtyId" value="@s.SpecialtyID">
+                    <input type="hidden" name="staffId" value="@s.StaffID">
+                    <button type="submit">Change spec</button>
+                </form>
+                    
+            </div>
+        </div>
+    }
+}
+
+<form method="POST">
+    <label id="userId">Choose userId to remove staff role</label>
+    <input type="text" name="userId" id="userId">
+    <button type="submit" asp-controller="User" asp-action="RemoveStaffRole">Remove Staff Role</button>
+</form>

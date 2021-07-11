@@ -357,3 +357,7 @@ D:\Study_material\C#\ChildCareProject\Childcare\obj\Debug\netcoreapp3.1\Razor\Vi
 D:\Study_material\C#\ChildCareProject\Childcare\obj\Debug\netcoreapp3.1\Razor\Views\Service\EditService.cshtml.g.cs
 D:\Study_material\C#\ChildCareProject\Childcare\obj\Debug\netcoreapp3.1\Razor\Views\Patient\PatientList.cshtml.g.cs
 D:\Study_material\C#\ChildCareProject\Childcare\obj\Debug\netcoreapp3.1\Razor\Views\Patient\PatientCreate.cshtml.g.cs
+D:\Study_material\C#\ChildCareProject\Childcare\obj\Debug\netcoreapp3.1\Razor\Views\User\UserList.cshtml.g.cs
+D:\Study_material\C#\ChildCareProject\Childcare\obj\Debug\netcoreapp3.1\Razor\Views\Patient\PatientDetail.cshtml.g.cs
+D:\Study_material\C#\ChildCareProject\Childcare\obj\Debug\netcoreapp3.1\Razor\Views\Reservation\ShowAvailableSlot.cshtml.g.cs
+D:\Study_material\C#\ChildCareProject\Childcare\obj\Debug\netcoreapp3.1\Razor\Views\Shared\_ChangeServiceStatePartial.cshtml.g.cs

@@ -28,7 +28,7 @@
         
         <form method="post" asp-controller="Service"
                 asp-action="EditService">
-            <h4>Edit @Model.ServiceName service.</h4>
+            <h4>Edit @Model.Service.ServiceName service.</h4>
             <hr />
             <div asp-validation-summary="All" class="text-danger"></div>
             <input type="hidden" asp-for="ServiceId" value="@Model.Service.ServiceID">
@@ -70,6 +70,7 @@
                 <input asp-for="ServiceTime" class="form-control" value="@Model.Service.ServiceTime"/>
                 <span asp-validation-for="ServiceTime" class="text-danger" ></span>
             </div>
+            <input type="hidden" asp-for="StaffOwnerId" value="@Model.Service.StaffID">
             <button type="submit" class="btn btn-primary">Edit</button>
         </form>
     </div>

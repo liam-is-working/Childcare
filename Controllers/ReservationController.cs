@@ -13,7 +13,8 @@ using Microsoft.Extensions.Logging;
 namespace Childcare.Controllers
 {
     [Authorize]
-    public class ReservationController : Controller{
+    public class ReservationController : Controller
+    {
         private readonly ILogger<ServiceController> _logger;
         private readonly ChildCareContext _db;
         private readonly UserManager<ChildCareUser> _um;
@@ -28,58 +29,73 @@ namespace Childcare.Controllers
             _autho = autho;
         }
 
+        //After choosing serviceId and datetime, slot number -> these 2 data will be binded into model
         //Get reservation form which provide Customer Services categorized by Specialties and his list of Patients
         [HttpGet]
-        public async Task<IActionResult> AddReservation(int? serviceId){
+        public async Task<IActionResult> AddReservation(AddReservationViewModel model, int dummy)
+        {
+
+
+            var serviceId = model.ServiceID;
+            if(!serviceId.HasValue)
+                return BadRequest("Must specify a service Id");
+            if(!model.ReservationSlot.HasValue)
+                return BadRequest("Must specify a slot number");
+            if(model.ReservationDate == null)
+                return BadRequest("Must specify reservation date");
 
             //Only Customer can make a reservation
-            if(User.IsInRole("Manager") || User.IsInRole("Staff"))
+            if (User.IsInRole("Manager") || User.IsInRole("Staff"))
                 return Forbid("Only Customer can make a reservation");
 
             var currentCustomerId = await GetCurrentCustomerIdAsync();
-            if(currentCustomerId == null)
-                return BadRequest("Current user is not found on dtb");
-
+            if (currentCustomerId == null)
+                return BadRequest("Current customer is not found on dtb");
 
             //For customer to choose his patient profile
-            var currentCustomer =await _db.Customers.Include(c => c.Patients)
+            var currentCustomer = await _db.Customers.Include(c => c.Patients)
                                         .FirstOrDefaultAsync(c => c.CustomerID == currentCustomerId);
-
-            if(currentCustomer == null)
-                return BadRequest("Current user is not found on dtb");
-
-            var model = new AddReservationViewModel();
 
             model.Customer = currentCustomer;
 
-            //Click button on a specific Service
-            if(serviceId.HasValue){
-                var service = _db.Services.Include(c => c.Specialty).FirstOrDefault(s => s.ServiceID == serviceId);
-                if(service == null)
-                    return NotFound("ServiceId cant be found");
+            //verify serviceId and get service
+            var service = _db.Services.Include(c => c.Specialty).FirstOrDefault(s => s.ServiceID == serviceId);
+            if (service == null)
+                return NotFound("ServiceId cant be found");
 
-                model.Service = service;
-            }     
+            model.Service = service;
 
-            //For customer to choose another service
-            model.Specialties = await _db.Specialties.Include(s => s.Services).ToListAsync();             
-                                      
-            return View(model);               
+            //serive, current customer && ReservationDatetime, slotNumber binded  model                  
+            return View(model);
         }
 
-        public async Task<IActionResult> ShowAvailableSlotPartial(DateTime chosenDate, Service chosenService){
-            if(chosenDate == null)
-                return BadRequest("Chosen date must be between 12 hours and 10 days after today");
+        
+        public async Task<IActionResult> ShowAvailableSlot(ShowAvailableSlotViewModel model)
+        {
+
+            var chosenService = await _db.Services.FirstOrDefaultAsync(s => s.ServiceID == model.ServiceId);
+            if (chosenService == null)
+                return NotFound("ServiceId is not found in dtb");
+
+            var chosenDate = model.ChosenDate;
+            if (chosenDate == null)
+                return BadRequest("Must specify a date");
 
             //Apply reservation time policy
-            if(!ValidateReservationTimePolicy(chosenDate))
+            if (!ValidateReservationTimePolicy(chosenDate))
                 return BadRequest("Chosen date must be between 12 hours and 10 days after today");
 
-            SlotGenerator(chosenService,chosenDate,out Dictionary<int, Slot> availableSlots);
+            var unavailableSlotNumber = _db.ReservationTimes
+                                .Where(rt => rt.ServiceID == chosenService.ServiceID 
+                                && rt.Date == chosenDate && rt.AvailableStaff==0)
+                                .Select(rt => rt.Slot).ToListAsync();
+            
 
-            //not pass any model if there's no available slot
-            if(availableSlots.Count==0)
-                return View();
+            SlotGenerator(await unavailableSlotNumber,_logger, chosenService, chosenDate, out Dictionary<int, Slot> availableSlots);
+
+            //stop if there's no available slot
+            if (availableSlots.Count == 0)
+                return PartialView(model);
 
             //Get unavailable (reserved or unactive)
             var unavailableSlotNumbers = await _db.ReservationTimes
@@ -92,19 +108,22 @@ namespace Childcare.Controllers
                 availableSlots.Remove(slotNum);
             }
             //Create a model and pass available slots into it
-            var model = new ShowAvailableSlotPartialViewModel{Slots = availableSlots};
+            model.Slots = availableSlots;
 
-            return View(model);
+            return PartialView(model);
 
         }
-        
+
+        //Bind patient id from customer's choice to model
         [HttpPost]
-        public async Task<IActionResult> AddReservation(AddReservationViewModel model){
+        public async Task<IActionResult> AddReservation(AddReservationViewModel model)
+        {
 
-            if(User.IsInRole("Staff") || User.IsInRole("Admin"))
-                return BadRequest ("Only customer can make a reservation");
+            if (User.IsInRole("Staff") || User.IsInRole("Admin"))
+                return BadRequest("Only customer can make a reservation");
 
-            if(!ModelState.IsValid){
+            if (!ModelState.IsValid)
+            {
                 return BadRequest("Invalid model");
             }
 
@@ -112,54 +131,64 @@ namespace Childcare.Controllers
             var requestingCustomer = await _db.Customers.Include(c => c.ChildcareUserId)
                                                 .Include(c => c.Patients)
                                                 .FirstOrDefaultAsync(c => c.CustomerID == model.CustomerID);
-            if(requestingCustomer == null)
+            if (requestingCustomer == null)
                 return NotFound("Customer in form is not valid");
 
-            if(requestingCustomer.ChildcareUserId != _um.GetUserId(User))
+            //Check if form is submit for and from the current user
+            if (requestingCustomer.ChildcareUserId != _um.GetUserId(User))
                 return BadRequest("Current user doesnt match user in form");
 
-            if(requestingCustomer.Patients.FirstOrDefault(p => p.CustomerID == requestingCustomer.CustomerID) == null )
+            if (requestingCustomer.Patients.FirstOrDefault(p => p.CustomerID == requestingCustomer.CustomerID) == null)
                 return BadRequest("Chosen patient is not owned by chosen customer");
 
-            if ((await GetCurrentCustomerIdAsync()) != model.CustomerID)
-                return NotFound("Current customer does not match with customer in form");
-
             var chosenService = await _db.Services.FirstOrDefaultAsync(s => s.ServiceID == model.ServiceID);
-            if(chosenService == null)
+            if (chosenService == null)
                 return NotFound("ServiceId is not found");
 
             if (!ValidateReservationTimePolicy(model.ReservationDate))
                 return BadRequest("Invalid Reservation date");
 
+            if(!model.ReservationSlot.HasValue)
+                return BadRequest("Must specify reservation slot number");  
+
+            var unavailableSlotNumber = _db.ReservationTimes
+                                .Where(rt => rt.ServiceID == chosenService.ServiceID 
+                                && rt.Date == model.ReservationDate && rt.AvailableStaff==0)
+                                .Select(rt => rt.Slot).ToListAsync();
+
             //check if slot is valid
-            SlotGenerator(chosenService, model.ReservationDate, out Dictionary<int,Slot> availableSlots);
-            if(!availableSlots.TryGetValue(model.ReservationSlot, out Slot chosenSlot))
-                return BadRequest("Invalid slot");
+            SlotGenerator(await unavailableSlotNumber,_logger, chosenService, model.ReservationDate, out Dictionary<int, Slot> availableSlots);
+            if (!availableSlots.TryGetValue((int)model.ReservationSlot, out Slot chosenSlot))
+                return BadRequest("Invalid slot, try again or choose another slot");
 
             //If all fields are valid               
-            
-            //Modify reservation time first
-            var reservationTime =await _db.ReservationTimes
-                                .FirstOrDefaultAsync(rt => rt.ServiceID == model.ServiceID && rt.Date==model.ReservationDate && rt.Slot == model.ReservationSlot);
 
-            if(reservationTime != null){
-                if(reservationTime.AvailableStaff == 0)
+            //Modify reservation time first
+            var reservationTime = await _db.ReservationTimes
+                                .FirstOrDefaultAsync(rt => rt.ServiceID == model.ServiceID && rt.Date == model.ReservationDate && rt.Slot == model.ReservationSlot);
+
+            if (reservationTime != null)
+            {
+                if (reservationTime.AvailableStaff == 0)
                     return BadRequest("There is no available staff for the chosen slot, please choose another one");
-                
-                reservationTime.AvailableStaff-=1;
+
+                reservationTime.AvailableStaff -= 1;
                 _db.Update(reservationTime);
-            }else
+            }
+            else
             {
                 var availableStaffs = _db.Staffs.CountAsync(s => s.SpecialtyID == chosenService.SpecialtyID);
-                reservationTime = new ReservationTime{
-                    ServiceID = model.ServiceID,
-                    Slot = model.ReservationSlot,
+                reservationTime = new ReservationTime
+                {
+                    ServiceID = (int)model.ServiceID,
+                    Slot = (int)model.ReservationSlot,
                     Date = model.ReservationDate,
                     AvailableStaff = await availableStaffs,
                 };
             }
 
-            var newReservation = new Reservation{
+            var newReservation = new Reservation
+            {
                 PatientID = model.PatientID,
                 ServiceID = model.ServiceID,
                 CustomerID = model.CustomerID,
@@ -171,19 +200,21 @@ namespace Childcare.Controllers
                 CheckInTime = DateTime.Now
             };
 
-            var addReservationTime =await _db.AddAsync(reservationTime);
-            var addReservation =await _db.AddAsync(newReservation);
+            var addReservationTime = await _db.AddAsync(reservationTime);
+            var addReservation = await _db.AddAsync(newReservation);
 
-            
-            if(addReservation.State == EntityState.Added && addReservationTime.State == EntityState.Added){
+
+            if (addReservation.State == EntityState.Added && addReservationTime.State == EntityState.Added)
+            {
                 var result = await _db.SaveChangesAsync();
-                if(result != 2){
+                if (result != 2)
+                {
                     _logger.LogError("Please check dtb Reservation and ReservationTime");
                     return BadRequest("Valid data but failed to update to database");
-                }                  
+                }
             }
-            
-            
+
+
 
             //Create a success view
             return View();
@@ -191,75 +222,109 @@ namespace Childcare.Controllers
 
 
         [NonAction]
-        private static bool ValidateReservationTimePolicy(DateTime chosenDate){
-            var hoursDistance = (chosenDate - DateTime.Now).Hours;
+        private static bool ValidateReservationTimePolicy(DateTime chosenDate)
+        {
+            var lowerBoundHourPolicy = 12;
+            var upperBoundHourPolicy = 10 * 24;
 
-            //Hardcode reservation time policy
-            if(hoursDistance < 12 || hoursDistance > 10*24){
+            var lowerAvailTime = DateTime.Now.AddHours(lowerBoundHourPolicy);
+            var upperAvailTime = DateTime.Now.AddHours(upperBoundHourPolicy);
+
+            if (lowerAvailTime.Date > chosenDate.Date || upperAvailTime.Date < chosenDate.Date)
                 return false;
-            }
 
             return true;
         }
 
         //Return all time-available slots
         [NonAction]
-        private static void SlotGenerator(Service service, DateTime chosenDate, out Dictionary<int,Slot> slots){
-            slots = new Dictionary<int,Slot>();
-            
+        private static void SlotGenerator(List<int> unavailableSlotNumbers,ILogger _log, Service service, DateTime chosenDate, out Dictionary<int, Slot> slots)
+        {
+
+            slots = new Dictionary<int, Slot>();
+
+
             var startTime = service.StartTime;
             var endTime = service.EndTime;
             var interval = service.ServiceTime;
 
             //Total slots of this service
-            int numOfSlots = ((int)(endTime-startTime).TotalMinutes)/(interval);
-            
-            //If today was chosen, some slots are overdue 
-            if(chosenDate.Date == DateTime.Today){
-                var availableTimeRn = DateTime.Now.Hour + 12;
-                //No slot is available today
-                if(availableTimeRn == 24)
-                    return;
+            int numOfSlots = ((int)(endTime - startTime).TotalMinutes) / (interval);
+
+            //Base on policy, some slot are overdue
+            var lowerBoundHourPolicy = 12;
+            var upperBoundHourPolicy = 24 * 10;
+            var lowerTimeOnPolicy = DateTime.Now.AddHours(lowerBoundHourPolicy);
+            var upperTimeOnPolicy = DateTime.Now.AddHours(upperBoundHourPolicy);
+
+            if (lowerTimeOnPolicy > chosenDate)
+            {
+                chosenDate = lowerTimeOnPolicy;
                 //Start time is start time of the available slot
-                while(availableTimeRn > startTime.Hour){
+                while (lowerTimeOnPolicy.Hour > startTime.Hour)
+                {
                     startTime = startTime.AddMinutes(interval);
                 }
             }
 
-            
+            if (upperTimeOnPolicy < chosenDate)
+            {
+                chosenDate = upperTimeOnPolicy;
+                //Start time is start time of the available slot
+                while (upperTimeOnPolicy.Hour < startTime.Hour)
+                {
+                    endTime = endTime.AddMinutes(-interval);
+                }
+            }
+
+
 
             //round down the number of slots avalable now
-            int numOfSlotsAvailable = ((int)(endTime-startTime).TotalMinutes)/(interval);
+            int numOfSlotsAvailable = ((int)(endTime - startTime).TotalMinutes) / (interval);
 
             var startingSlotCount = numOfSlots - numOfSlotsAvailable;
 
             //No slot available
-            if(numOfSlotsAvailable <= 0)
-                return;           
-            
-            for(int i = 0; i<numOfSlotsAvailable;i++){
-                var start = startTime.AddMinutes(interval*i);
-                var end = start.AddMinutes(interval);
-                var slotNumber =i+1+startingSlotCount;
+            if (numOfSlotsAvailable <= 0)
+            {
+                _log.LogWarning($"Slot Generator: No slot is available");
+                return;
+            }
 
-                slots.Add(slotNumber, new Slot{
+            //deletelater
+            _log.LogInformation("Slot Generator: Slots found!");
+
+            //Add all time-available slots
+            for (int i = 0; i < numOfSlotsAvailable; i++)
+            {
+                var start = startTime.AddMinutes(interval * i);
+                var end = start.AddMinutes(interval);
+                var slotNumber = i + 1 + startingSlotCount;
+
+                slots.Add(slotNumber, new Slot
+                {
                     StartTime = start,
                     EndTime = end
-                });               
-            }          
+                });
+            }
+            //Remove all unavailable slots
+            foreach(var unavailableSlotNum in unavailableSlotNumbers){
+                slots.Remove(unavailableSlotNum);
+            }
         }
 
         [NonAction]
-        private async Task<int?> GetCurrentCustomerIdAsync(){
+        private async Task<int?> GetCurrentCustomerIdAsync()
+        {
             var currentUSerId = _um.GetUserId(User);
-            if(currentUSerId == null)
+            if (currentUSerId == null)
                 return null;
 
-            var queryResult =await _db.Customers.Select(c =>new {c.CustomerID, c.ChildcareUserId})
+            var queryResult = await _db.Customers.Select(c => new { c.CustomerID, c.ChildcareUserId })
                                 .FirstOrDefaultAsync(a => a.ChildcareUserId == currentUSerId);
 
             return queryResult.CustomerID;
-            
+
         }
     }
 }

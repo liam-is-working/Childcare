@@ -30,6 +30,10 @@ else
                 <div class="card-text">pId: @p.PatientID</div>
                 <div class="card-text">@p.Birthday</div>
                 <div class="card-text">@p.Gender</div>
+                <form asp-action="PatientDetail" method="get">
+                    <input type="hidden" value="@p.PatientID" name="patientId">
+                    <button type="submit">Detail</button>
+                </form>
             </div>
         </div>
     }

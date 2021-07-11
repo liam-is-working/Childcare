@@ -108,11 +108,6 @@ namespace Childcare.Controllers
         [HttpGet]
         public async Task<IActionResult> PatientListAsync(int? custId)
         {
-            //Customer request for list but no ownerId specified
-            if (custId != null && !User.IsInRole("Manager") && !User.IsInRole("Staff"))
-                return BadRequest("Customer can only see his patient list");
-
-
 
             var model = new PatientListViewModel();
 
@@ -135,11 +130,13 @@ namespace Childcare.Controllers
             //Customer request for a list of patient
             else
             {
-
-                var ownerId = (await _db.Customers
-                        .FirstAsync(cust => cust.ChildcareUserId == _um.GetUserId(User)))
-                        .CustomerID;
-
+                var owner = await _db.Customers
+                        .FirstOrDefaultAsync(cust => cust.ChildcareUserId == _um.GetUserId(User));
+                        
+                if(owner==null)
+                    return NotFound("Cant find customer with this current user id");
+                
+                var ownerId = owner.CustomerID;
                 //Customer request for his list of Patients
                 model.Patients = await _db.Patients.Where(p => p.CustomerID == ownerId).ToListAsync();
                 return View(model);
@@ -155,10 +152,10 @@ namespace Childcare.Controllers
                 return View();
             }
 
-            Patient oldPatient;
+            Patient updatePatient;
             try
             {
-                oldPatient = await _db.Patients.FirstAsync(p => p.PatientID == model.PatientID);
+                updatePatient = await _db.Patients.FirstAsync(p => p.PatientID == model.PatientID);
             }
             catch (InvalidOperationException)
             {
@@ -172,40 +169,38 @@ namespace Childcare.Controllers
             if (!isAuthorized)
             {
                 var custId = await GetCurrentCustomerIdAsync();
-                if (custId != model.Patient.CustomerID)
+                if (custId != model.CustomerID)
                     return Forbid();
             }
 
             //Update patient
-            var newPatient = new Patient
-            {
-                //unchangable
-                PatientID = oldPatient.PatientID,
-                CustomerID = oldPatient.CustomerID,
-                CreatedDate = oldPatient.CreatedDate,
-                //changable
-                PatientName = model.PatientName,
-                Birthday = model.Birthday,
-                Gender = model.Gender,
-                UpdatedDate = DateTime.Now
-                
-            };
+            if(model.PatientName != updatePatient.PatientName)
+                updatePatient.PatientName = model.PatientName;
+
+            if(model.Birthday != updatePatient.Birthday)
+                updatePatient.Birthday = model.Birthday;
+
+            if(model.Gender != updatePatient.Gender)
+                updatePatient.Gender = model.Gender;
+
+            updatePatient.UpdatedDate = DateTime.Now;    
 
             try
             {
-                _db.Update(newPatient);
+                _db.Update(updatePatient);
                 var result = await _db.SaveChangesAsync();
-                if (result != 1)
+                //since updateDate always change
+                if (result < 1)
                     _logger.LogWarning("Update Patient but no change is made in database");
 
             }
             catch (Exception e)
             {
-                _logger.LogError($"Update Patient: {e.Message}");
+                _logger.LogError(e.Message);
                 return Error();
             }
 
-            return RedirectToAction("PatientDetail", new { patientId = model.PatientID });
+            return RedirectToAction("PatientDetail", new {patientId = model.PatientID});
         }
 
         public async Task<IActionResult> PatientDeleteAsync([Required] int[] patientIds)
@@ -280,7 +275,7 @@ namespace Childcare.Controllers
             {
                 var custId = await GetCurrentCustomerIdAsync();
                 if (custId != model.Patient.CustomerID)
-                    return Forbid();
+                    return Forbid("The current user is not this patient's owner");
             }
 
             return View(model);
@@ -291,7 +286,7 @@ namespace Childcare.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
-
+        [NonAction]
         async Task<int> GetCurrentCustomerIdAsync()
         {
             var userId = _um.GetUserId(User);

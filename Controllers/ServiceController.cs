@@ -149,11 +149,11 @@ namespace Childcare.Controllers
             if (!ModelState.IsValid)
                 return BadRequest("Invalid model");
 
-            var oldService = await _db.Services
+            var updatedService = await _db.Services
                                     .Include(s => s.Status)
                                     .FirstOrDefaultAsync(s => s.ServiceID == model.ServiceId);
 
-            if (oldService.ServiceID == 0)
+            if (updatedService.ServiceID == 0)
                 return NotFound($"Can't find service with id: {model.ServiceId}");
 
 
@@ -164,50 +164,49 @@ namespace Childcare.Controllers
             if (User.IsInRole("Staff"))
             {
                 //Staff can only edit rejected or pending services
-                if (oldService.StatusID == ((int)StatusName.Approved))
+                if (updatedService.StatusID == ((int)StatusName.Approved))
                     return BadRequest("Staff can only edit rejected or pending services");
 
-                var currentStaffId = (await _db.Staffs.Select(staff => new { staff.StaffID, staff.ChildcareUserId })
-                                            .FirstOrDefaultAsync(a => a.ChildcareUserId == _um.GetUserId(User)))
-                                            .StaffID;
-                if (currentStaffId == 0)
+                var currentStaffIdTuple = (await _db.Staffs.Select(staff => new { staff.StaffID, staff.ChildcareUserId })
+                                            .FirstOrDefaultAsync(a => a.ChildcareUserId == _um.GetUserId(User)));
+                                            
+                if (currentStaffIdTuple == null)
                     return BadRequest("Staff is not valid!");
 
-                if (currentStaffId != model.Service.StaffID)
+                if (currentStaffIdTuple.StaffID != model.StaffOwnerId)
                     return BadRequest("Current staff is not author of this service");
 
                 //If owner edit service information, it will be pended
                 newStatus = StatusName.Pending;
             }
 
-            //Bug, use old service and make changes based on updated fields
-            var updatedService = new Service
-            {
-                ServiceID = oldService.ServiceID,
-                CreatedDate = oldService.CreatedDate,
-                StaffID = oldService.StaffID,
-                ServiceName = model.ServiceName,
-                SpecialtyID = model.SpecialtyID,
-                //hardcode map status id with StatusName enum
-                StatusID = ((int)newStatus),
-                UpdatedDate = DateTime.Now,
-                Description = model.Description,
-                Thumbnail = model.Thumbnail,
-                StartTime = model.StartTime,
-                EndTime = model.EndTime,
-                ServiceTime = model.ServiceTime,
-                Price = model.Price,
-            };
-
-            
-
-
+            //Update service
+            if(updatedService.Description != model.Description)
+                updatedService.Description = model.Description;
+            if(updatedService.ServiceName != model.ServiceName)
+                updatedService.ServiceName = model.ServiceName;
+            if(updatedService.Thumbnail != model.Thumbnail)
+                updatedService.Thumbnail = model.Thumbnail;
+            if(updatedService.SpecialtyID != model.SpecialtyID)
+                updatedService.SpecialtyID = model.SpecialtyID;
+            if(updatedService.Price != model.Price)
+                updatedService.Price = model.Price;
+            if(updatedService.StartTime != model.StartTime)
+                updatedService.StartTime = model.StartTime;
+            if(updatedService.EndTime != model.EndTime)
+                updatedService.EndTime = model.EndTime;
+            if(updatedService.ServiceName != model.ServiceName)
+                updatedService.ServiceName = model.ServiceName;
+            if(updatedService.StartTime != model.StartTime)
+                updatedService.StartTime = model.StartTime;
+            updatedService.UpdatedDate = DateTime.Now;
+            updatedService.StatusID = (int?)newStatus;
 
             _db.Update(updatedService);
 
             var result = await _db.SaveChangesAsync();
 
-            if (result != 1)
+            if (result < 1)
                 return BadRequest("System failed to update service");
 
             //Redirect to service list

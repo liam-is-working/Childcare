@@ -1,0 +1,15 @@
+@model int
+@if (User.IsInRole("Manager"))
+{
+    <form asp-controller="Service" asp-action="ChangeServiceState" method="POST">
+        <label for="status">Choose status</label>
+        <select name="statusId">
+            <option value="1">Approved</option>
+            <option value="2">Rejected</option>
+            <option value="3">Pending</option>
+        </select>
+        <br><br>
+        <input type="hidden" name="serviceId" value="@Model">
+        <input type="submit" value="Submit">
+    </form>
+}

@@ -1,0 +1,36 @@
+@model Childcare.Models.ShowAvailableSlotViewModel
+@{
+    var chosenDateString = $"{Model.ChosenDate:dd:mm:yyyy}";
+    ViewData["Title"] = $"Slot(s) available for {Model.ChosenDate:dd:mm:yyyy}";
+    
+}
+
+@if (Model.Slots == null || Model.Slots.Count == 0)
+{
+    <h4>No slot available</h4>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <td>Slot number</td>
+                <td>Start time</td>
+                <td>End time</td>
+                <td>Click button to choose</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var s in Model.Slots)
+            {
+                <tr>
+                    <td>@s.Key</td>
+                    <td>@s.Value.StartTime.ToShortTimeString()"</td>
+                    <td>@s.Value.EndTime.ToShortTimeString()</td>
+                    <td><button>Choose</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    
+}
