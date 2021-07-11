@@ -1,0 +1,53 @@
+@model Childcare.Models.AddReservationViewModel
+@{
+    ViewData["Title"] = "Make a new reservation";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="row">
+    <div class="col-md-4">     
+        <form method="post" asp-controller="Reservation"
+                asp-action="AddReservation">
+            <hr>
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <h6>Service detail</h6>
+            <hr>
+            @Html.Partial("_ServiceDetail", Model.Service)
+            <h6>Schedule detail</h6>
+            <hr>
+            Reservation date: @Html.DisplayFor(m => m.ReservationDate)
+            <br>
+            Slot number: @Html.DisplayFor(m => m.ReservationSlot)
+            <br>
+            Start at: @Html.DisplayFor(m => m.StartTime, "{0:hh:mm tt}")
+            <br>
+            End at: @Html.DisplayFor(m => m.EndTime, "{0:hh:mm tt}")
+            <h6>Patient profile list</h6>
+            <hr>
+            <div class="container">
+            @foreach (var p in Model.Customer.Patients)
+            {
+                <div class="row">
+                    @Html.Partial("_PatientDetail", p)
+                </div>
+                
+            }
+            </div>
+            <h6>Choose a patient</h6>
+            <hr>
+            <div class="form-group">
+                <label asp-for="PatientID"></label>
+                <input asp-for="PatientID" class="form-control" />
+                <span asp-validation-for="PatientID" class="text-danger"></span>
+            </div>
+            <input type="hidden" asp-for="ServiceID">
+            <input type="hidden" asp-for="ReservationDate">
+            <input type="hidden" asp-for="ReservationSlot">
+            <input type="hidden" asp-for="CustomerID">
+            <button type="submit" class="btn btn-primary">Make a reservation</button>
+        </form>
+    </div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

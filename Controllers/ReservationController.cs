@@ -30,12 +30,11 @@ namespace Childcare.Controllers
         }
 
         //After choosing serviceId and datetime, slot number -> these 2 data will be binded into model
-        //Get reservation form which provide Customer Services categorized by Specialties and his list of Patients
+        //Get reservation form which provide Customer his list of Patients to choose and the slot,date,service he chose
         [HttpGet]
         public async Task<IActionResult> AddReservation(AddReservationViewModel model, int dummy)
         {
-
-
+            
             var serviceId = model.ServiceID;
             if(!serviceId.HasValue)
                 return BadRequest("Must specify a service Id");
@@ -43,7 +42,9 @@ namespace Childcare.Controllers
                 return BadRequest("Must specify a slot number");
             if(model.ReservationDate == null)
                 return BadRequest("Must specify reservation date");
-
+            if(model.StartTime == default(DateTime))
+                return BadRequest("Must specify slot detail");
+            
             //Only Customer can make a reservation
             if (User.IsInRole("Manager") || User.IsInRole("Staff"))
                 return Forbid("Only Customer can make a reservation");
@@ -57,6 +58,7 @@ namespace Childcare.Controllers
                                         .FirstOrDefaultAsync(c => c.CustomerID == currentCustomerId);
 
             model.Customer = currentCustomer;
+            model.CustomerID = (int)currentCustomerId;
 
             //verify serviceId and get service
             var service = _db.Services.Include(c => c.Specialty).FirstOrDefault(s => s.ServiceID == serviceId);
@@ -65,7 +67,7 @@ namespace Childcare.Controllers
 
             model.Service = service;
 
-            //serive, current customer && ReservationDatetime, slotNumber binded  model                  
+            //serive, current customer, patientList && ReservationDatetime, slotNumber binded  model                  
             return View(model);
         }
 
@@ -108,6 +110,7 @@ namespace Childcare.Controllers
         [HttpPost]
         public async Task<IActionResult> AddReservation(AddReservationViewModel model)
         {
+            _logger.LogInformation(model.CustomerID.ToString());
 
             if (User.IsInRole("Staff") || User.IsInRole("Admin"))
                 return BadRequest("Only customer can make a reservation");
@@ -118,11 +121,17 @@ namespace Childcare.Controllers
             }
 
             //Validate form data
-            var requestingCustomer = await _db.Customers.Include(c => c.ChildcareUserId)
-                                                .Include(c => c.Patients)
-                                                .FirstOrDefaultAsync(c => c.CustomerID == model.CustomerID);
-            if (requestingCustomer == null)
+            var requestingCustomer = new Customer();
+            try
+            {
+                requestingCustomer = await _db.Customers.Include(c => c.Patients)
+                                    .Include(c => c.ChildCareUser).FirstAsync(c => c.CustomerID == model.CustomerID);
+            }
+            catch (InvalidOperationException)
+            {
                 return NotFound("Customer in form is not valid");
+            }
+                       
 
             //Check if form is submit for and from the current user
             if (requestingCustomer.ChildcareUserId != _um.GetUserId(User))
@@ -156,7 +165,7 @@ namespace Childcare.Controllers
             //Modify reservation time first
             var reservationTime = await _db.ReservationTimes
                                 .FirstOrDefaultAsync(rt => rt.SpecialtyID == chosenService.SpecialtyID && rt.Date == model.ReservationDate && rt.Slot == model.ReservationSlot);
-
+            bool reservationTimeAdd = false;
             if (reservationTime != null)
             {
                 if (reservationTime.AvailableStaff == 0)
@@ -167,14 +176,25 @@ namespace Childcare.Controllers
             }
             else
             {
-                var availableStaffs = _db.Staffs.CountAsync(s => s.SpecialtyID == chosenService.SpecialtyID);
+                reservationTimeAdd = true;
+                var availableStaffsTask = _db.Staffs.CountAsync(s => s.SpecialtyID == chosenService.SpecialtyID);
                 reservationTime = new ReservationTime
                 {
                     SpecialtyID = (int)chosenService.SpecialtyID,
                     Slot = (int)model.ReservationSlot,
-                    Date = model.ReservationDate,
-                    AvailableStaff = await availableStaffs,
+                    Date = model.ReservationDate.Date,
+                    AvailableStaff = await availableStaffsTask
                 };
+
+                if(reservationTime.AvailableStaff==0){
+                    await _db.AddAsync(reservationTime);
+                    var result = await _db.SaveChangesAsync();
+                    if(result!=1)
+                        _logger.LogWarning("Fail to update 0-staff reservation time into dtb");
+                    return BadRequest("There's no available staff for this slot, please try again");
+                }
+
+                reservationTime.AvailableStaff -=1;
             }
 
             var newReservation = new Reservation
@@ -182,32 +202,26 @@ namespace Childcare.Controllers
                 PatientID = model.PatientID,
                 ServiceID = (int)model.ServiceID,
                 CustomerID = model.CustomerID,
-                ReservationDate = model.ReservationDate,
+                ReservationDate = model.ReservationDate.Date,
                 ReservationSlot = (int)model.ReservationSlot,
                 CreatedDate = DateTime.Now,
                 UpdatedDate = DateTime.Now,
                 //fix later
                 CheckInTime = DateTime.Now
             };
-
-            var addReservationTime = await _db.AddAsync(reservationTime);
+            
             var addReservation = await _db.AddAsync(newReservation);
-
-
-            if (addReservation.State == EntityState.Added && addReservationTime.State == EntityState.Added)
-            {
-                var result = await _db.SaveChangesAsync();
-                if (result != 2)
-                {
-                    _logger.LogError("Please check dtb Reservation and ReservationTime");
-                    return BadRequest("Valid data but failed to update to database");
-                }
+            if( reservationTimeAdd){
+                await _db.AddAsync(reservationTime);
             }
-
-
-
+            
+            var dtbChangeResult = await _db.SaveChangesAsync();
+            if(dtbChangeResult !=2)
+                _logger.LogCritical("Valid reservation form but fail to update to 2 table Reservation and ReservationTime");
+            
+            
             //Create a success view
-            return View();
+            return Ok();
         }
 
 

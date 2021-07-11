@@ -11,10 +11,13 @@ namespace Childcare.Models
         public IList<Specialty> Specialties {get;set;}
 
         public Customer Customer{get;set;}
+        public DateTime StartTime{get;set;}
+        public DateTime EndTime{get;set;}
 
         //To display a service detail
         
         public Service Service {get;set;}
+        [Required]
         public int CustomerID { get; set; }
         [Required]
         public int? PatientID { get; set; }

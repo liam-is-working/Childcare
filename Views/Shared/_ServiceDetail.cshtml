@@ -1,0 +1,12 @@
+@model Childcare.Areas.Identity.Data.Service
+Service ID: @Html.DisplayFor(m => m.ServiceID)
+<br>
+Service Name: @Html.DisplayFor(m => m.ServiceName)
+<br>
+Specialty: @Html.DisplayFor(m => m.Specialty.SpecialtyName)
+<br>
+Start at: @Html.DisplayFor(m => m.StartTime, "hh:mm tt")
+<br>
+End at: @Html.DisplayFor(m => m.EndTime, "hh:mm tt")
+<br>
+Price: @Html.DisplayFor(m => m.Price)

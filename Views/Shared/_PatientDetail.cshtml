@@ -1,0 +1,14 @@
+@model Childcare.Areas.Identity.Data.Patient
+@{
+    var dataTargetString = "patient" + Model.PatientID;
+}
+<button class="btn btn-primary" type="button" data-toggle="collapse" data-target=#@dataTargetString aria-expanded="false" aria-controls="collapseExample">
+    (@Html.DisplayFor(p => p.PatientID))@Html.DisplayFor(p => p.PatientName)
+</button>
+<div class="collapse" id=@dataTargetString>
+  <div class="card card-body">
+    Patient birthday: @Html.DisplayFor(p => p.Birthday, "dd:mm:yyyy")
+    Patient gender: @Html.DisplayFor(p => p.Gender)
+  </div>
+</div>
+

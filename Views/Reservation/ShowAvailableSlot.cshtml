@@ -27,7 +27,16 @@ else
                     <td>@s.Key</td>
                     <td>@s.Value.StartTime.ToShortTimeString()"</td>
                     <td>@s.Value.EndTime.ToShortTimeString()</td>
-                    <td><button>Choose</button></td>
+                    <td>
+                        <form action="AddReservation" method="Get">
+                            <input type="hidden" name="serviceId" value="@Model.ServiceId">
+                            <input type="hidden" name="ReservationSlot" value="@s.Key">
+                            <input type="hidden" name="ReservationDate" value="@Model.ChosenDate">
+                            <input type="input" name="StartTime" value="@s.Value.StartTime">
+                            <input type="input" name="EndTime" value="@s.Value.EndTime">
+                            <button type="submit">Choose</button>
+                        </form>
+                    </td>
                 </tr>
             }
         </tbody>
