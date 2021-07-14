@@ -247,6 +247,7 @@ namespace Childcare.Controllers
             var currentStaffId = await GetCurrentStaffIdAsync();
             var timeStamp = DateTime.Now;
 
+            
 
             //New service's status is Pending
             var newService = new Service
