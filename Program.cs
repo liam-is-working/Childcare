@@ -17,33 +17,31 @@ namespace Childcare
         {
             var host = CreateHostBuilder(args).Build();
 
-            // using (var scope = host.Services.CreateScope())
-            // {
-            //     var services = scope.ServiceProvider;
+            using (var scope = host.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    //Populate Roles
+                    await PopulateIdentityData.PopulateRolesAsync(services,new string[] {"Manager", "Staff", "Admin"});
 
-            //     try
-            //     {
-
-
-            //         // requires using Microsoft.Extensions.Configuration;
-            //         //var config = host.Services.GetRequiredService<IConfiguration>();
-            //         // Set password with the Secret Manager tool.
-            //         // dotnet user-secrets set SeedUserPW <pw>
-
-            //         //var testUserPw = config["SeedUserPW"];
-
-            //         //Populate Roles
-            //         //await PopulateIdentityData.PopulateRolesAsync(services,new string[] {"Manager", "Staff", "Admin"});
-
-            //         //Seed data
-            //         //SeedData.Initialize(services, "Passw0rd!").Wait();
-            //     }
-            //     catch (Exception ex)
-            //     {
-            //         var logger = services.GetRequiredService<ILogger<Program>>();
-            //         logger.LogError(ex, "An error occurred populating the DB.");
-            //     }
-            // }
+                    //Seed data
+                    var managerAccount = new UserRegisterModel{
+                        Email = "manager@gmail.com",
+                        Password = "Passw0rd!",
+                        FullName = "Manager",
+                        DOB = DateTime.Today.AddYears(-20),
+                        CitizenID = "00000000000",
+                        Address = "FPT HCM"
+                    };
+                    await PopulateChildcareData.PopulateManagerAsync(services, managerAccount);
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred populating the DB or data has already been populated!");
+                }
+            }
 
             host.Run();
         }

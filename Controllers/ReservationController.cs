@@ -236,6 +236,10 @@ namespace Childcare.Controllers
             var filter = model.Filter;
             query = _db.Reservations;
             if(filter != null){
+                if(!filter.ShowOldReservation.HasValue){
+                    filter.ShowOldReservation = false;
+                    query = query.Where(r => r.CheckInTime > DateTime.Today);
+                }
                 if(filter.ReservationID.HasValue)
                     query = query.Where(r => r.ReservationID == filter.ReservationID);
                 if(filter.CustomerID.HasValue)
@@ -254,6 +258,9 @@ namespace Childcare.Controllers
                     query = query.Where(r => r.ReservationDate.Date >= filter.FromTime.Value.Date);
                 if(filter.ToTime.HasValue)
                     query = query.Where(r => r.ReservationDate.Date <= filter.ToTime.Value.Date);
+            }else{
+                //only show new reservation as default
+                query = query.Where(r => r.CheckInTime > DateTime.Today);
             }
 
             //Customer can view his reservations only
@@ -276,6 +283,7 @@ namespace Childcare.Controllers
             });
 
             model.ReservationCards = await queryReservationCard.ToListAsync();
+            model.ReservationCards.Sort();
             
             return View(model);
         }

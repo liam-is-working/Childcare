@@ -223,13 +223,20 @@ namespace Childcare.Controllers
                 return Error();
             }
 
+            //Cant remove patient that has some reservations
+            foreach (var p in patients)
+            {
+                if(p.Reservations.Count>0){
+                    return BadRequest($"PatientID {p.PatientID} has reservation, unable to delete");
+                }
+                        
+            }
+
             //Manager and Staff can delete any patient profile
             if (User.IsInRole("Manager") || User.IsInRole("Staff"))
             {
                 foreach (var p in patients)
                 {
-                    if(p.Reservations.Count>0)
-                        return BadRequest($"PatientID {p.PatientID} has reservation, unable to delete");
                     _db.Remove(p);
                 }
                 await _db.SaveChangesAsync();
