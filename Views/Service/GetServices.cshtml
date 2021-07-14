@@ -36,12 +36,13 @@ else
             <div class="card-header">@service.ServiceName
                 @service.Specialty.SpecialtyName
             </div>
-            <div class="card-body text-dark @cardBgColor">
+            <div class="card-body text-dark @cardBgColor" >
                 <div class="card-text">@service.Description</div>
                 <div class="card-text">Start at: @service.StartTime.ToShortTimeString()</div>
                 <div class="card-text">End at: @service.EndTime.ToShortTimeString()</div>
                 <div class="card-text">Price: @service.Price.</div>
                 <div class="card-text">Take: @service.ServiceTime mins</div>
+                <div class="card-text">SpecialtyID: @service.SpecialtyID</div>
                 <partial name="_ChangeServiceStatePartial" model="Tuple.Create(@service.ServiceID,@service.StatusID.Value)" />
                 @if (isAuthorized)
                 {
