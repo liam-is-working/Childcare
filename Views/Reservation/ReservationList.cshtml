@@ -1,0 +1,100 @@
+@model Childcare.Models.ReservationListViewModel
+@{
+    ViewData["title"] = "Reservation List";
+    var isAuthorized = User.IsInRole("Staff") || User.IsInRole("Manager");
+}
+
+<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#filterFrom" aria-expanded="false"
+    aria-controls="collapseExample">
+    Filter
+</button>
+<div class="collapse" id="filterFrom">
+    <div class="row">
+        <div class="col-md-4">
+            <form method="post" asp-controller="Reservation" asp-action="ReservationList">
+                <button type="submit" class="btn btn-primary">Apply filter</button>
+                <div class="form-group">
+                    <label asp-for="Filter.ReservationID"></label>
+                    <input asp-for="Filter.ReservationID" class="form-control" />
+                    <span asp-validation-for="Filter.ReservationID" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Filter.ServiceID"></label>
+                    <input asp-for="Filter.ServiceID" class="form-control" />
+                    <span asp-validation-for="Filter.ServiceID" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Filter.PatientID"></label>
+                    <input asp-for="Filter.PatientID" class="form-control" />
+                    <span asp-validation-for="Filter.PatientID" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Filter.ReservationDate"></label>
+                    <input asp-for="Filter.ReservationDate" class="form-control" />
+                    <span asp-validation-for="Filter.ReservationDate" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Filter.SlotNumber"></label>
+                    <input asp-for="Filter.SlotNumber" class="form-control" />
+                    <span asp-validation-for="Filter.SlotNumber" class="text-danger"></span>
+                </div>
+                @if (isAuthorized)
+                {
+                    <div class="form-group">
+                        <label asp-for="Filter.CustomerID"></label>
+                        <input asp-for="Filter.CustomerID" class="form-control" />
+                        <span asp-validation-for="Filter.CustomerID" class="text-danger"></span>
+                    </div>
+                }
+                <div class="form-group">
+                    <label asp-for="Filter.SpecialtyID"></label>
+                    <input asp-for="Filter.SpecialtyID" class="form-control" />
+                    <span asp-validation-for="Filter.SpecialtyID" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Filter.FromTime"></label>
+                    <input asp-for="Filter.FromTime" class="form-control" />
+                    <span asp-validation-for="Filter.FromTime" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Filter.ToTime"></label>
+                    <input asp-for="Filter.ToTime" class="form-control" />
+                    <span asp-validation-for="Filter.ToTime" class="text-danger"></span>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+<h4>@ViewData["Title"]</h4>
+@if (Model.ReservationCards.Count == 0)
+{
+    <div>There's no reservation</div>
+}
+else
+{
+    foreach (var rCard in Model.ReservationCards)
+    {
+        <div class="card border-dark mb-3" style="max-width: 24rem;">
+            <div class="card-header">
+                ReservationID: @rCard.ReservationID
+                <br>
+                CustomerID: @rCard.CustomerID
+                <br>
+                ServiceID: @rCard.ServiceID
+            </div>
+            <div class="card-body text-dark">
+                <div class="card-text">Service name: @rCard.ServiceName</div>
+                <div class="card-text">Reservation Date: @rCard.ReservationDate</div>
+                <div class="card-text">Slot number: @rCard.SlotNumber</div>
+                <div class="card-text">Checkin time: @rCard.CheckinTime</div>
+                @* <form asp-action="PatientDetail" method="get">
+                    <input type="hidden" value="@p.PatientID" name="patientId">
+                    <button type="submit">Detail</button>
+                    </form> *@
+            </div>
+        </div>
+    }
+}

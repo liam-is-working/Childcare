@@ -97,9 +97,10 @@ namespace Childcare.Controllers
 
 
             //Check if service exists in dtb
+            var service = new Service();
             try
             {
-                model.Service = await _db.Services.Include(s => s.Specialty)
+                service = await _db.Services.Include(s => s.Specialty)
                                     .Include(s => s.Staff)
                                     .Include(s => s.Status)
                                     .FirstAsync(s => s.ServiceID == serviceId);
@@ -109,12 +110,23 @@ namespace Childcare.Controllers
                 return NotFound($"ServiceId {serviceId} doesnt exist");
             }
 
+            //Map service data to model data
+            model.Price = service.Price;
+            model.ServiceId = service.ServiceID;
+            model.ServiceName = service.ServiceName;
+            model.ServiceTime = service.ServiceTime;
+            model.StartTime = service.StartTime;
+            model.EndTime = service.EndTime;
+            model.SpecialtyID = service.SpecialtyID;
+            model.Thumbnail = service.Thumbnail;
+            model.Description = service.Description;
+            model.StaffOwnerId = (int)service.StaffID;
 
             //Only owner (staff create this service) or managers can edit 
             if (User.IsInRole("Staff"))
             {
                 //Staff can only edit rejected or pending services
-                if (model.Service.StatusID == ((int)StatusName.Approved))
+                if (service.StatusID == ((int)StatusName.Approved))
                     return BadRequest("Staff can only edit rejected or pending services");
 
                 var currentStaffId = (await _db.Staffs.Select(staff => new { staff.StaffID, staff.ChildcareUserId })
@@ -123,15 +135,13 @@ namespace Childcare.Controllers
                 if (currentStaffId == 0)
                     return BadRequest("Staff is not valid!");
 
-                if (currentStaffId != model.Service.StaffID)
+                if (currentStaffId != service.StaffID)
                     return BadRequest("Current staff is not author of this service");
             }
 
             //(Not implemented) consider using cached 
             model.Specialties = await _db.Specialties.ToListAsync();
-
-            _logger.LogDebug($"{model.Service.StartTime:hh:mm tt}");
-            _logger.LogDebug($"{model.Service.EndTime:hh:mm tt}");
+            
 
 
             //Model is a complete Service instance with Specialties to choose from 
@@ -142,9 +152,7 @@ namespace Childcare.Controllers
         [Authorize(Roles = "Manager, Staff")]
         public async Task<IActionResult> EditServiceAsync(EditServiceViewModel model)
         {
-            _logger.LogInformation($"service edit _ post called");
             
-
             //server validation
             if (!ModelState.IsValid)
                 return BadRequest("Invalid model");
@@ -282,7 +290,7 @@ namespace Childcare.Controllers
 
             //nothing happend if reassasign current status with itself
             if (service.StatusID == statusId)
-                return RedirectToAction("EditService", new { serviceId = serviceId });
+               return RedirectToAction("GetServices");
 
             //check status
             bool validStat = false;
@@ -318,7 +326,7 @@ namespace Childcare.Controllers
             }
 
             _logger.LogInformation("Change service state");
-            return RedirectToAction("EditService", new { serviceId = serviceId });
+            return RedirectToAction("GetServices");
 
         }
         async Task<int> GetCurrentStaffIdAsync()

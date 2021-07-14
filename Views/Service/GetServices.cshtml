@@ -1,6 +1,7 @@
 @model List<Childcare.Areas.Identity.Data.Service>
 @{
     ViewData["title"] = "Service";
+    var isAuthorized = User.IsInRole("Manager") || User.IsInRole("Staff");
 }
 
 <h4>@ViewData["Title"]</h4>
@@ -21,33 +22,40 @@ else
     {
         <div class="card border-dark mb-3" style="max-width: 18rem;">
             @{
-                string cardBgColor = "bg-success";
-                if (service.StatusID == 2)
-                    cardBgColor = "bg-danger";
-                if (service.StatusID == 3)
-                    cardBgColor = "bg-warning";
+                string cardBgColor = "";
+                if (isAuthorized)
+                {
+                    cardBgColor = "bg-success";
+                    if (service.StatusID == 2)
+                        cardBgColor = "bg-danger";
+                    if (service.StatusID == 3)
+                        cardBgColor = "bg-warning";
+                }
+
             }
             <div class="card-header">@service.ServiceName
                 @service.Specialty.SpecialtyName
             </div>
             <div class="card-body text-dark @cardBgColor">
                 <div class="card-text">@service.Description</div>
-                <div class="card-text">Start at: @service.StartTime</div>
-                <div class="card-text">End at: @service.EndTime</div>
-                <div class="card-text">Price: @service.Price</div>
-                <div class="card-text">Take: @service.ServiceTime</div>
-                <partial name="_ChangeServiceStatePartial" model="@service.ServiceID"/>
-                @if (User.IsInRole("Manager") || User.IsInRole("Staff"))
+                <div class="card-text">Start at: @service.StartTime.ToShortTimeString()</div>
+                <div class="card-text">End at: @service.EndTime.ToShortTimeString()</div>
+                <div class="card-text">Price: @service.Price.</div>
+                <div class="card-text">Take: @service.ServiceTime mins</div>
+                <partial name="_ChangeServiceStatePartial" model="Tuple.Create(@service.ServiceID,@service.StatusID.Value)" />
+                @if (isAuthorized)
                 {
                     <form asp-action="EditService" method="GET">
                         <input type="hidden" name="serviceId" value="@service.ServiceID">
                         <button type="submit">Edit</button>
                     </form>
-                }else{
+                }
+                else
+                {
                     <form asp-controller="Reservation" asp-action="ShowAvailableSlot" method="GET">
-                        <input type="hidden" name="model.ServiceId" value="@service.ServiceID">                      
+                        <input type="hidden" name="model.ServiceId" value="@service.ServiceID">
                         <button type="submit">Show available slot for </button>
-                        <input type="date" name="model.ChosenDate" >
+                        <input type="date" name="model.ChosenDate">
                     </form>
                 }
             </div>

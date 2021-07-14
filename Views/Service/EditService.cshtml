@@ -7,6 +7,7 @@
 
 <div class="row">
     <div class="col-md-4">
+        <h4>Specialty list</h4>
         <table>
             <thead>
                 <tr>
@@ -28,49 +29,47 @@
         
         <form method="post" asp-controller="Service"
                 asp-action="EditService">
-            <h4>Edit @Model.Service.ServiceName service.</h4>
-            <hr />
             <div asp-validation-summary="All" class="text-danger"></div>
-            <input type="hidden" asp-for="ServiceId" value="@Model.Service.ServiceID">
+            <input type="hidden" asp-for="ServiceId" >
             <div class="form-group">
                 <label asp-for="SpecialtyID"></label>
-                <input asp-for="SpecialtyID" class="form-control" value="@Model.Service.SpecialtyID"/>
+                <input asp-for="SpecialtyID" class="form-control" />
                 <span asp-validation-for="SpecialtyID" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="ServiceName"></label>
-                <input asp-for="ServiceName" class="form-control" value="@Model.Service.ServiceName"/>
+                <input asp-for="ServiceName" class="form-control" />
                 <span asp-validation-for="ServiceName" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Thumbnail"></label>
-                <input asp-for="Thumbnail" class="form-control" value="@Model.Service.Thumbnail"/>
+                <input asp-for="Thumbnail" class="form-control" />
             </div>
             <div class="form-group">
                 <label asp-for="Description"></label>
-                <input asp-for="Description" class="form-control" value="@Model.Service.Description"/>
+                <input asp-for="Description" class="form-control" />
             </div>
             <div class="form-group">
                 <label asp-for="Price"></label>
-                <input asp-for="Price" class="form-control" value="@Model.Service.Price"/>
+                <input asp-for="Price" class="form-control" />
                 <span asp-validation-for="Price" class="text-danger" ></span>
             </div>
             <div class="form-group">
                 <label asp-for="StartTime"></label>
-                <input asp-for="StartTime" class="form-control" value="@Model.Service.StartTime"/>
+                <input asp-for="StartTime" class="form-control" />
                 <span asp-validation-for="StartTime" class="text-danger" ></span>
             </div>
             <div class="form-group">
                 <label asp-for="EndTime"></label>
-                <input asp-for="EndTime" class="form-control" value="@Model.Service.EndTime"/>
+                <input asp-for="EndTime" class="form-control" />
                 <span asp-validation-for="EndTime" class="text-danger" ></span>
             </div>
             <div class="form-group">
                 <label asp-for="ServiceTime"></label>
-                <input asp-for="ServiceTime" class="form-control" value="@Model.Service.ServiceTime"/>
+                <input asp-for="ServiceTime" class="form-control"/>
                 <span asp-validation-for="ServiceTime" class="text-danger" ></span>
             </div>
-            <input type="hidden" asp-for="StaffOwnerId" value="@Model.Service.StaffID">
+            <input type="hidden" asp-for="StaffOwnerId" >
             <button type="submit" class="btn btn-primary">Edit</button>
         </form>
     </div>

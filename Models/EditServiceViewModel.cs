@@ -6,8 +6,6 @@ using Childcare.Areas.Identity.Data;
 namespace Childcare.Models
 {
     public class EditServiceViewModel{
-        //To show current properties of a service
-        public Service Service{get;set;}
         //Controller provide a list of specialty to choose from
         public List<Specialty> Specialties{get;set;}
 
@@ -22,13 +20,19 @@ namespace Childcare.Models
         [Required]
         public string Description { get; set; }
         [Required]
+        [DataType(DataType.Time)]  
         public DateTime StartTime {get;set;}
         [Required]
+        [DataType(DataType.Time)]  
+        [TimeCustom("StartTime")]
         public DateTime EndTime {get;set;}
         [Required]
+        [Display(Name = "ServiceTime(in minutes)")]
+        [Range(0,24*60)]
         //in minute
         public int ServiceTime{get;set;}
         [Required]
+        [DataType(DataType.Currency)]
         public float Price {get;set;}
         [Required]
         public int StaffOwnerId{get;set;}

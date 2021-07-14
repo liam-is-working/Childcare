@@ -17,6 +17,7 @@ namespace Childcare.Areas.Identity.Data
         public int CustomerID { get; set; }
         public int? PatientID { get; set; }
         public int ServiceID { get; set; }
+        public int SpecialtyID { get; set; }
         public int? StaffAssignedID { get; set; }
         public DateTime CheckInTime { get; set; }
         public DateTime CreatedDate { get; set; }

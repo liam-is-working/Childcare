@@ -206,8 +206,8 @@ namespace Childcare.Controllers
                 ReservationSlot = (int)model.ReservationSlot,
                 CreatedDate = DateTime.Now,
                 UpdatedDate = DateTime.Now,
-                //fix later
-                CheckInTime = DateTime.Now
+                CheckInTime = model.StartTime,
+                SpecialtyID = (int)chosenService.SpecialtyID
             };
             
             var addReservation = await _db.AddAsync(newReservation);
@@ -224,6 +224,61 @@ namespace Childcare.Controllers
             return Ok();
         }
 
+        [Authorize]
+        public async Task<IActionResult> ReservationList(ReservationListViewModel model){
+            var isAuthorized = User.IsInRole("Staff") || User.IsInRole("Manager");
+
+            
+            IQueryable<Reservation> query;
+            
+
+            //Apply filter
+            var filter = model.Filter;
+            query = _db.Reservations;
+            if(filter != null){
+                if(filter.ReservationID.HasValue)
+                    query = query.Where(r => r.ReservationID == filter.ReservationID);
+                if(filter.CustomerID.HasValue)
+                    query = query.Where(r => r.CustomerID == filter.CustomerID);
+                if(filter.PatientID.HasValue)
+                    query = query.Where(r => r.PatientID == filter.PatientID);
+                if(filter.SpecialtyID.HasValue)
+                    query = query.Where(r => r.SpecialtyID == filter.SpecialtyID);
+                if(filter.ServiceID.HasValue)
+                    query = query.Where(r => r.ServiceID == filter.ServiceID);
+                if(filter.SlotNumber.HasValue)
+                    query = query.Where(r => r.ServiceID == filter.SlotNumber);
+                if(filter.ReservationDate.HasValue)
+                    query = query.Where(r => r.ReservationDate.Date == filter.ReservationDate.Value.Date);
+                if(filter.FromTime.HasValue)
+                    query = query.Where(r => r.ReservationDate.Date >= filter.FromTime.Value.Date);
+                if(filter.ToTime.HasValue)
+                    query = query.Where(r => r.ReservationDate.Date <= filter.ToTime.Value.Date);
+            }
+
+            //Customer can view his reservations only
+            if(!isAuthorized){
+                var custId = await GetCurrentCustomerIdAsync();
+                if(!custId.HasValue)
+                    return BadRequest("Current userId is not found in Cutomer database");
+                query = query.Where(r => r.CustomerID == custId);
+            }
+
+            //Projection to reduce data transfer
+            var queryReservationCard = query.Select(r => new ReservationCard{
+                ServiceID = r.ServiceID,
+                CustomerID = r.CustomerID,
+                ReservationID = r.ReservationID,
+                ServiceName = r.Service.ServiceName,
+                ReservationDate = r.ReservationDate,
+                SlotNumber = r.ReservationSlot,
+                CheckinTime = r.CheckInTime
+            });
+
+            model.ReservationCards = await queryReservationCard.ToListAsync();
+            
+            return View(model);
+        }
 
         [NonAction]
         private static bool ValidateReservationTimePolicy(DateTime chosenDate)

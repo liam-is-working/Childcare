@@ -210,7 +210,7 @@ namespace Childcare.Controllers
             {
                 foreach (var pId in patientIds)
                 {
-                    patients.Add(await _db.Patients.Include(p => p.Customer).FirstAsync(p => p.PatientID == pId));
+                    patients.Add(await _db.Patients.Include(p => p.Customer).Include(p => p.Reservations).FirstAsync(p => p.PatientID == pId));
                 }
             }
             catch (InvalidOperationException)
@@ -228,6 +228,8 @@ namespace Childcare.Controllers
             {
                 foreach (var p in patients)
                 {
+                    if(p.Reservations.Count>0)
+                        return BadRequest($"PatientID {p.PatientID} has reservation, unable to delete");
                     _db.Remove(p);
                 }
                 await _db.SaveChangesAsync();

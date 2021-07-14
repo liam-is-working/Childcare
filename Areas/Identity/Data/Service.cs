@@ -25,7 +25,9 @@ namespace Childcare.Areas.Identity.Data
         public DateTime CreatedDate { get; set; }
         public DateTime UpdatedDate { get; set; }
         public int? StaffID { get; set; }
+        [DataType(DataType.Time)]
         public DateTime StartTime {get;set;}
+        [DataType(DataType.Time)]
         public DateTime EndTime {get;set;}
         //in minute
         public int ServiceTime{get;set;}

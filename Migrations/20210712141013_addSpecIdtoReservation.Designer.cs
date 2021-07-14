@@ -4,14 +4,16 @@ using Childcare.Areas.Identity.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Childcare.Migrations
 {
     [DbContext(typeof(ChildCareContext))]
-    partial class ChildCareContextModelSnapshot : ModelSnapshot
+    [Migration("20210712141013_addSpecIdtoReservation")]
+    partial class addSpecIdtoReservation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
